@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="We's Keys">
+<title>We's Keys</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Gowun+Batang:wght@400;700&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════
+   TOKENS — 오래된 기록장
+══════════════════════════════════════ */
+:root{
+  --paper:#ECE0C5; --paper-hi:#F4EBD6; --paper-lo:#DFCFAE; --paper-edge:#CDB98F;
+  --ink:#2B1E12; --ink-2:#4E3B27; --ink-3:#7D6648; --ink-4:#A8916D;
+  --rule:rgba(110,80,40,.28);
+  --pen:#26304F;      /* 만년필 블루블랙 — 직접 쓴 글씨 */
+  --rust:#8A3320;     /* 도장 잉크 */
+  --brass:#9C7A33; --brass-hi:#D9BC6C;
+  --f-display:'IM Fell English','Gowun Batang',serif;
+  --f-sc:'IM Fell English SC','Gowun Batang',serif;
+  --f-body:'Gowun Batang',serif;
+  --f-hand:'Nanum Pen Script','Gowun Batang',cursive;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .32 0 0 0 0 .22 0 0 0 0 .1 0 0 0 .2 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");
+  --stain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.012' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .3 0 0 0 0 .12 0 0 0 .55 -.2'/%3E%3C/filter%3E%3Crect width='600' height='600' filter='url(%23s)'/%3E%3C/svg%3E");
+  --grain-v:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='w'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9 .012' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .05 0 0 0 0 .01 0 0 0 .6 -.12'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23w)'/%3E%3C/svg%3E");
+  --grain-h:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='60'%3E%3Cfilter id='h'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.008 .5' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .12 0 0 0 0 .06 0 0 0 0 .01 0 0 0 .55 -.1'/%3E%3C/filter%3E%3Crect width='400' height='60' filter='url(%23h)'/%3E%3C/svg%3E");
+  --check:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2.5 8.5c1.5 1 2.6 2.4 3.5 4 1.8-4 4.4-7.3 8-10' fill='none' stroke='%2326304F' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{background:#1E140A var(--grain-v);font-family:var(--f-body);color:var(--ink);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+input,textarea{font:inherit;color:inherit}
+
+/* ── 앱 = 한 장의 오래된 종이 ── */
+.app{
+  position:relative;max-width:430px;height:100%;height:100dvh;margin:0 auto;
+  display:flex;flex-direction:column;overflow:hidden;
+  background-color:var(--paper);
+  background-image:var(--noise),var(--stain),radial-gradient(ellipse 120% 90% at 50% 45%,transparent 55%,rgba(105,68,28,.3) 100%);
+  box-shadow:0 0 40px rgba(0,0,0,.6);
+}
+.view{display:none;flex:1;min-height:0;flex-direction:column;position:relative}
+.view.active{display:flex;animation:fade .35s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+
+/* ── 공통 장식 ── */
+.orn{display:flex;align-items:center;justify-content:center;gap:10px;color:var(--ink-3);font-size:15px;margin:10px auto 0}
+.orn::before,.orn::after{content:"";height:1px;width:58px;background:linear-gradient(90deg,transparent,var(--ink-3))}
+.orn::after{background:linear-gradient(90deg,var(--ink-3),transparent)}
+.kicker{font-family:var(--f-sc);font-size:12px;letter-spacing:.28em;color:var(--ink-3);text-transform:uppercase}
+
+.page-head{text-align:center;padding:calc(var(--safe-top) + 22px) 20px 4px}
+.page-head h1{font-family:var(--f-body);font-weight:700;font-size:25px;letter-spacing:-.01em;margin-top:5px;color:var(--ink)}
+.page-head .sub{font-family:var(--f-display);font-style:italic;font-size:15px;color:var(--ink-3);margin-top:3px}
+
+.bar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:calc(var(--safe-top) + 10px) 14px 11px;position:relative}
+.bar::after{content:"";position:absolute;left:14px;right:14px;bottom:0;height:4px;border-top:1px solid var(--ink-3);border-bottom:1px solid var(--ink-3);opacity:.55}
+.bar-title{font-family:var(--f-display);font-style:italic;font-size:21px;color:var(--ink)}
+.link-btn{font-family:var(--f-body);font-size:14px;color:var(--ink-2);padding:6px 2px;min-width:72px;text-align:left}
+.stamp-btn{font-family:var(--f-body);font-weight:700;font-size:14px;letter-spacing:.12em;color:var(--rust);border:1.5px solid var(--rust);border-radius:3px;padding:5px 13px 4px;transform:rotate(-2.5deg);box-shadow:inset 0 0 0 2px var(--paper),inset 0 0 0 3px rgba(138,51,32,.5);background:rgba(138,51,32,.05)}
+.stamp-btn:active{transform:rotate(-2.5deg) scale(.93)}
+.bar-right{min-width:72px;display:flex;justify-content:flex-end}
+
+/* ══════════════════════════════════════
+   LANDING — 증서
+══════════════════════════════════════ */
+.landing{display:flex;flex-direction:column;justify-content:space-between;padding:calc(var(--safe-top) + 26px) 22px calc(var(--safe-bottom) + 24px)}
+.cert{border:1.5px solid var(--ink-2);padding:6px;position:relative}
+.cert-in{border:1px solid var(--ink-3);padding:26px 18px 24px;text-align:center}
+.cn{position:absolute;width:9px;height:9px;background:var(--paper);border:1.5px solid var(--ink-2);transform:rotate(45deg)}
+.cn.tl{top:-5px;left:-5px}.cn.tr{top:-5px;right:-5px}.cn.bl{bottom:-5px;left:-5px}.cn.br{bottom:-5px;right:-5px}
+.seal{display:block;margin:16px auto 12px;filter:drop-shadow(0 2px 2px rgba(60,20,10,.35))}
+.cert-title{font-family:var(--f-display);font-weight:400;font-size:48px;line-height:1;color:var(--ink)}
+.cert-title i{color:var(--rust)}
+.cert-sub{font-family:var(--f-display);font-style:italic;font-size:18px;color:var(--ink-2);margin-top:8px}
+.cert-desc{font-size:14.5px;line-height:1.9;color:var(--ink-2);margin-top:14px}
+.cert-foot{margin-top:16px;font-family:var(--f-sc);font-size:11px;letter-spacing:.24em;color:var(--ink-3)}
+.login{margin-top:26px}
+.login .kicker{display:block;text-align:center;margin-bottom:12px}
+.lbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px;border-radius:6px;font-family:var(--f-body);font-weight:700;font-size:15px;margin-bottom:10px;transition:transform .1s}
+.lbtn:active{transform:scale(.98)}
+.lbtn.kakao{background:#FEE500;color:#191600;box-shadow:0 1px 0 rgba(0,0,0,.15)}
+.lbtn.google{background:#FFFDF7;color:#2A2A2A;border:1px solid var(--paper-edge)}
+.terms{text-align:center;font-size:11.5px;color:var(--ink-3);line-height:1.7;margin-top:10px}
+.terms a{color:var(--ink-2)}
+
+/* ══════════════════════════════════════
+   CELLAR — 나무 장식장
+══════════════════════════════════════ */
+.cellar{background-color:#3A2311;background-image:var(--grain-v),linear-gradient(90deg,rgba(0,0,0,.4),transparent 10%,transparent 90%,rgba(0,0,0,.4)),linear-gradient(180deg,#4A2E16,#2A190B)}
+.cellar-head{flex-shrink:0;text-align:center;padding:calc(var(--safe-top) + 22px) 20px 14px;position:relative}
+.plate{display:inline-block;position:relative;padding:7px 30px 6px;background:linear-gradient(180deg,#E2C67E 0%,#B8933F 45%,#8C6B26 100%);border-radius:2px;box-shadow:inset 0 1px 0 rgba(255,245,210,.6),inset 0 -1px 0 rgba(0,0,0,.35),0 3px 6px rgba(0,0,0,.55);font-family:var(--f-sc);font-size:18px;letter-spacing:.24em;color:#3B2A0E;text-shadow:0 1px 0 rgba(255,240,200,.45)}
+.plate::before,.plate::after{content:"";position:absolute;top:50%;width:5px;height:5px;margin-top:-2.5px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#F2DFA8,#6B5018);box-shadow:0 0 0 .5px rgba(0,0,0,.4)}
+.plate::before{left:10px}.plate::after{right:10px}
+.cellar-sub{font-family:var(--f-display);font-style:italic;font-size:14.5px;color:rgba(236,224,197,.62);margin-top:10px}
+.brass-add{position:absolute;right:18px;top:calc(var(--safe-top) + 22px);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 35% 30%,#EBD08A,#A9852F 60%,#7A5C1C);box-shadow:inset 0 1px 0 rgba(255,250,220,.5),0 2px 5px rgba(0,0,0,.6);color:#3B2A0E;font-family:var(--f-display);font-size:26px;line-height:1;padding-bottom:3px}
+.brass-add:active{transform:scale(.92)}
+.shelves{padding:8px 0 30px}
+.shelf{position:relative;margin-bottom:34px}
+.shelf::before{content:"";position:absolute;left:0;right:0;top:0;bottom:20px;background:linear-gradient(180deg,transparent 35%,rgba(0,0,0,.25));pointer-events:none}
+.shelf-items{display:flex;gap:12px;align-items:flex-end;overflow-x:auto;padding:16px 22px 0;scrollbar-width:none;position:relative}
+.shelf-items::-webkit-scrollbar{display:none}
+.plank{position:relative;height:20px;background-color:#7A4E26;background-image:var(--grain-h),linear-gradient(180deg,#9E6B36 0%,#7A4E26 35%,#4A2C12 100%);box-shadow:0 9px 14px -4px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,220,170,.28)}
+.plank-tag{position:absolute;left:22px;top:4px;padding:1px 9px 0;font-family:var(--f-sc);font-size:10.5px;letter-spacing:.16em;color:#3B2A0E;background:linear-gradient(180deg,#E2C67E,#A9852F);border-radius:1px;box-shadow:0 1px 1px rgba(0,0,0,.5)}
+.btl{flex-shrink:0;width:64px;display:flex;flex-direction:column;align-items:center;gap:5px;padding-bottom:6px;cursor:pointer}
+.btl svg{filter:drop-shadow(0 6px 5px rgba(0,0,0,.55));transition:transform .15s}
+.btl:active svg{transform:translateY(-6px)}
+.btl-name{font-family:var(--f-display);font-size:11.5px;line-height:1.2;color:rgba(240,228,200,.9);text-align:center;word-break:keep-all;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.btl-stars{font-size:8.5px;color:var(--brass-hi);letter-spacing:1px}
+.btl.empty{opacity:.4}
+.ghost{width:36px;height:60px;border:1px dashed rgba(240,228,200,.7);border-radius:9px 9px 4px 4px;display:flex;align-items:center;justify-content:center;color:rgba(240,228,200,.85);font-family:var(--f-display);font-size:22px}
+.cellar-empty{text-align:center;padding:36px 30px 10px;color:rgba(236,224,197,.6)}
+.cellar-empty .big{font-family:var(--f-display);font-style:italic;font-size:21px;color:rgba(236,224,197,.85)}
+.cellar-empty p{font-size:13.5px;line-height:1.85;margin-top:10px}
+
+/* ══════════════════════════════════════
+   TAB BAR
+══════════════════════════════════════ */
+.tabbar{display:none;flex-shrink:0;position:relative;z-index:5;background-color:var(--paper-lo);background-image:var(--noise);border-top:1px solid var(--ink-3);padding:3px 6px var(--safe-bottom)}
+.tabbar::before{content:"";position:absolute;left:0;right:0;top:3px;height:1px;background:var(--ink-3);opacity:.4}
+.tabbar.show{display:flex}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 0 11px;color:var(--ink-3);position:relative}
+.tab svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round}
+.tab span{font-family:var(--f-body);font-size:11px;letter-spacing:.04em}
+.tab.on{color:var(--ink)}
+.tab.on span{font-weight:700}
+.tab.on::after{content:"";position:absolute;bottom:3px;width:4px;height:4px;transform:rotate(45deg);background:var(--rust)}
+
+/* ══════════════════════════════════════
+   FORM — 기록 양식
+══════════════════════════════════════ */
+.mode{display:flex;justify-content:center;margin:18px 22px 0;border-bottom:1px solid var(--ink-3);gap:4px}
+.mode button{padding:8px 18px 7px;font-family:var(--f-body);font-size:14px;color:var(--ink-3);border:1px solid transparent;border-bottom:none;border-radius:7px 7px 0 0;margin-bottom:-1px}
+.mode button.on{color:var(--ink);font-weight:700;background:var(--paper-hi);border-color:var(--ink-3)}
+.sec{padding:26px 22px 2px}
+.sec-head{text-align:center;margin-bottom:20px}
+.sec-num{font-family:var(--f-sc);font-size:12px;letter-spacing:.32em;color:var(--rust)}
+.sec-ttl{font-family:var(--f-body);font-weight:700;font-size:20px;margin-top:3px}
+.sec-ttl em{font-family:var(--f-display);font-weight:400;font-style:italic;font-size:16px;color:var(--ink-3);margin-left:7px}
+.field{margin-bottom:22px}
+.row{display:flex;gap:16px}.row>.field{flex:1;min-width:0}
+.lbl{display:block;font-family:var(--f-sc);font-size:13px;letter-spacing:.1em;color:var(--ink-3);margin-bottom:3px}
+.lbl small{font-family:var(--f-body);letter-spacing:0;font-size:11.5px;margin-left:5px;color:var(--ink-4)}
+.hand{display:block;width:100%;border:none;border-bottom:1px dashed var(--ink-4);background:transparent;outline:none;border-radius:0;-webkit-appearance:none;appearance:none;font-family:var(--f-hand);font-size:24px;line-height:1.25;color:var(--pen);padding:2px 1px 1px;min-height:36px}
+.hand::placeholder{color:var(--ink-4);opacity:.8}
+.hand:focus{border-bottom:1px solid var(--ink-2)}
+input[type=number].hand::-webkit-inner-spin-button,input[type=number].hand::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+input[type=number].hand{-moz-appearance:textfield}
+.sheet{display:block;width:100%;border:none;outline:none;resize:none;-webkit-appearance:none;border-radius:0;background:transparent;background-image:repeating-linear-gradient(180deg,transparent 0,transparent 31px,var(--rule) 31px,var(--rule) 32px);background-attachment:local;line-height:32px;font-family:var(--f-hand);font-size:23px;color:var(--pen);min-height:96px;padding:0 4px 0 12px;border-left:1px solid rgba(138,51,32,.38)}
+.sheet::placeholder{color:var(--ink-4);opacity:.8}
+
+/* 위스키 찾기 */
+.lookup{position:relative}
+.lookup-row{display:flex;align-items:center;gap:8px;border-bottom:1px dashed var(--ink-4)}
+.lookup-row:focus-within{border-bottom:1px solid var(--ink-2)}
+.lookup-row svg{width:18px;height:18px;stroke:var(--ink-3);fill:none;stroke-width:1.4;flex-shrink:0}
+.lookup-row .hand{border-bottom:none}
+.spin{width:14px;height:14px;border:1.5px solid var(--paper-edge);border-top-color:var(--ink-2);border-radius:50%;animation:spin .7s linear infinite;display:none;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.suggest{display:none;position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:20;background-color:var(--paper-hi);background-image:var(--noise);border:1px solid var(--paper-edge);box-shadow:0 12px 26px -8px rgba(60,40,15,.5);max-height:310px;overflow-y:auto}
+.sg{padding:11px 14px 10px;border-bottom:1px dotted var(--ink-4);cursor:pointer}
+.sg:active{background:var(--paper-lo)}
+.sg b{display:block;font-family:var(--f-display);font-weight:400;font-size:17.5px;color:var(--ink)}
+.sg span{font-size:11.5px;color:var(--ink-3)}
+.sg.manual{font-size:13.5px;color:var(--ink-2);border-bottom:none;background:rgba(80,50,20,.04)}
+.autofill{display:none;margin-top:8px;font-family:var(--f-sc);font-size:11.5px;letter-spacing:.14em;color:var(--brass)}
+
+/* 색 견본 */
+.swatches{display:grid;grid-template-columns:repeat(11,1fr);gap:5px;margin-top:8px}
+.sw{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
+.sw i{display:block;width:100%;aspect-ratio:1;border-radius:50%;box-shadow:inset 0 -3px 4px rgba(0,0,0,.22),inset 0 2px 2px rgba(255,255,255,.35),0 0 0 1px rgba(60,40,15,.28);transition:transform .12s}
+.sw span{font-family:var(--f-display);font-style:italic;font-size:8.5px;color:var(--ink-3);text-align:center;line-height:1.1}
+.sw.on i{box-shadow:inset 0 -3px 4px rgba(0,0,0,.22),inset 0 2px 2px rgba(255,255,255,.35),0 0 0 2px var(--paper),0 0 0 3.5px var(--ink)}
+.sw:active i{transform:scale(.88)}
+.picked{font-family:var(--f-hand);font-size:23px;color:var(--pen);min-height:30px;margin-top:6px}
+.picked:empty::before{content:"아직 고르지 않았어요";color:var(--ink-4)}
+
+/* 점도 */
+.vis-ends{display:flex;justify-content:space-between;font-family:var(--f-display);font-style:italic;font-size:13.5px;color:var(--ink-3);margin-top:4px}
+.range{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;margin:2px 0 0;display:block}
+.range:focus{outline:none}
+.range::-webkit-slider-runnable-track{height:1.5px;background:var(--ink-2)}
+.range::-moz-range-track{height:1.5px;background:var(--ink-2)}
+.range::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-10.25px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#EBD08A,#A9852F 60%,#7A5C1C);box-shadow:0 1px 3px rgba(0,0,0,.45)}
+.range::-moz-range-thumb{width:22px;height:22px;border:none;border-radius:50%;background:radial-gradient(circle at 35% 30%,#EBD08A,#A9852F 60%,#7A5C1C)}
+.ticks{display:flex;justify-content:space-between;padding:0 10px;margin-top:-6px}
+.ticks i{width:1px;height:6px;background:var(--ink-3)}
+.vis-val{text-align:center;font-family:var(--f-hand);font-size:23px;color:var(--pen);margin-top:4px}
+
+/* 태그 = 도장 */
+.tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
+.tag{font-family:var(--f-body);font-size:13.5px;color:var(--ink-2);padding:5px 11px 4px;border:1px solid var(--paper-edge);border-radius:2px;background:rgba(255,250,236,.45);transition:transform .12s,color .12s;user-select:none;-webkit-user-select:none;cursor:pointer}
+.tag.on{color:var(--rust);border-color:var(--rust);background:rgba(138,51,32,.06);box-shadow:inset 0 0 0 1px rgba(138,51,32,.28);transform:rotate(-1.6deg)}
+.tag.on:nth-child(even){transform:rotate(1.3deg)}
+.tag.add{border-style:dashed;color:var(--ink-3)}
+.tag b{font-weight:400;margin-left:7px;color:var(--ink-3)}
+.hint{font-family:var(--f-hand);font-size:20.5px;color:var(--ink-3);min-height:26px;margin-top:8px}
+.etc{display:none;align-items:center;gap:10px;margin-top:6px}
+.etc.show{display:flex}
+.etc .hand{flex:1}
+.mini-stamp{flex-shrink:0;font-family:var(--f-body);font-weight:700;font-size:13px;color:var(--rust);border:1px solid var(--rust);border-radius:2px;padding:4px 11px 3px}
+.custom{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.custom:empty{display:none}
+
+/* 별점 */
+.stars{display:flex;align-items:center;gap:1px}
+.star{font-size:33px;line-height:1;color:transparent;-webkit-text-stroke:1px var(--ink-3);padding:0 1px;transition:transform .1s}
+.star.on{color:var(--brass);-webkit-text-stroke:1px #6B5018}
+.star:active{transform:scale(.86)}
+.star-lbl{font-family:var(--f-hand);font-size:22px;color:var(--pen);margin-left:10px}
+
+/* 체크박스형 선택지 */
+.opts{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:6px}
+.opt{display:inline-flex;align-items:center;gap:8px;font-size:14.5px;color:var(--ink-2);padding:3px 0}
+.opt::before{content:"";width:15px;height:15px;border:1.3px solid var(--ink-2);border-radius:1px;flex-shrink:0;background:center/15px no-repeat}
+.opt.on{color:var(--ink);font-weight:700}
+.opt.on::before{background-image:var(--check)}
+
+/* 상세 모드 */
+.more{display:none}
+.detailed .more{display:block;animation:fade .3s ease}
+.expand{display:block;width:calc(100% - 44px);margin:6px 22px 34px;padding:13px 0 12px;text-align:center;font-size:14px;color:var(--ink-2);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.expand i{font-style:normal;color:var(--rust);margin-right:7px}
+
+/* ══════════════════════════════════════
+   DETAIL — 표본 라벨
+══════════════════════════════════════ */
+.specimen{margin:22px 20px 4px;padding:5px;border:1.5px solid var(--ink-2)}
+.specimen-in{border:1px solid var(--ink-3);padding:18px 16px;display:flex;gap:16px;align-items:center;background:rgba(255,250,236,.35)}
+.sp-kicker{font-family:var(--f-sc);font-size:11.5px;letter-spacing:.18em;color:var(--rust)}
+.sp-name{font-family:var(--f-display);font-size:26px;line-height:1.1;color:var(--ink);margin:4px 0 6px;word-break:keep-all}
+.sp-meta{font-size:12.5px;color:var(--ink-3);line-height:1.6}
+.sp-stars{color:var(--brass);font-size:17px;letter-spacing:2px;margin-top:6px}
+.priv{display:inline-block;margin-top:8px;font-family:var(--f-sc);font-size:10.5px;letter-spacing:.14em;color:var(--ink-3);border:1px solid var(--ink-4);padding:2px 7px 1px}
+.byline{text-align:center;font-family:var(--f-hand);font-size:23px;color:var(--pen);margin-top:14px}
+.byline small{font-family:var(--f-display);font-style:italic;font-size:13.5px;color:var(--ink-3);margin-left:4px}
+.dsec{padding:22px 24px 2px}
+.dsec h3{display:flex;align-items:center;gap:10px;font-weight:400;margin-bottom:12px}
+.dsec h3::after{content:"";flex:1;height:1px;background:var(--rule)}
+.dsec h3 b{font-family:var(--f-body);font-weight:700;font-size:15.5px;color:var(--ink)}
+.dsec h3 i{font-family:var(--f-display);font-size:13.5px;color:var(--ink-3)}
+.kv{margin-bottom:12px}
+.kv dt{font-family:var(--f-sc);font-size:12px;letter-spacing:.12em;color:var(--ink-3)}
+.kv dd{font-family:var(--f-hand);font-size:23.5px;line-height:1.3;color:var(--pen);margin-top:1px;white-space:pre-wrap;word-break:break-word}
+.dot{display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:-1px;margin-right:7px;box-shadow:inset 0 -2px 3px rgba(0,0,0,.25),0 0 0 1px rgba(60,40,15,.3)}
+.quote{font-family:var(--f-hand);font-size:28px;line-height:1.35;color:var(--pen);text-align:center;padding:0 8px;word-break:keep-all}
+.quote::before{content:"“";color:var(--ink-4);margin-right:2px}.quote::after{content:"”";color:var(--ink-4);margin-left:2px}
+.stamps{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.stamps span{font-size:12.5px;color:var(--rust);border:1px solid rgba(138,51,32,.6);padding:3px 9px 2px;border-radius:2px}
+.compare{padding:16px 16px 6px;background:rgba(255,250,236,.55);border:1px solid var(--paper-edge);box-shadow:3px 4px 0 rgba(60,40,15,.08)}
+.meter{display:flex;align-items:baseline;justify-content:space-between;font-size:14px;color:var(--ink-2)}
+.meter b{font-family:var(--f-display);font-size:32px;color:var(--rust);font-weight:400}
+.track{height:4px;background:var(--paper-lo);margin:6px 0 12px;position:relative;box-shadow:inset 0 0 0 1px var(--paper-edge)}
+.track i{position:absolute;left:0;top:0;bottom:0;background:var(--rust)}
+.cmp{display:flex;gap:10px;align-items:baseline;padding:8px 0;border-top:1px dotted var(--ink-4)}
+.cmp dt{flex-shrink:0;width:72px;font-family:var(--f-body);font-size:12px;color:var(--ink-3)}
+.cmp dd{flex:1;font-family:var(--f-hand);font-size:21.5px;color:var(--pen);line-height:1.25}
+.nudge{font-size:13.5px;line-height:1.8;color:var(--ink-2)}
+.ghost-btn{display:block;width:100%;text-align:center;font-family:var(--f-body);font-size:14px;color:var(--ink);padding:12px;border:1px solid var(--ink-3);margin-top:12px;background:rgba(255,250,236,.4)}
+.ghost-btn:active{background:var(--paper-lo)}
+.peer{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px dotted var(--ink-4);cursor:pointer}
+.peer:first-of-type{border-top:1px dotted var(--ink-4)}
+.peer-who{font-family:var(--f-hand);font-size:22px;color:var(--pen);line-height:1.1}
+.peer-txt{font-size:12.5px;color:var(--ink-2);margin-top:2px}
+.peer-stars{margin-left:auto;color:var(--brass);font-size:12px;flex-shrink:0}
+.danger{display:block;margin:30px auto 36px;font-family:var(--f-body);font-size:13.5px;color:var(--rust);text-decoration:underline;text-underline-offset:3px}
+
+/* ══════════════════════════════════════
+   EXCHANGE — 다른 사람들의 노트
+══════════════════════════════════════ */
+.notice{margin:14px 22px 4px;padding:9px 12px;border:1px dashed var(--ink-4);font-size:12px;color:var(--ink-3);line-height:1.65;text-align:center}
+.notice b{color:var(--rust)}
+.chips{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;padding:14px 18px 4px}
+.chip{font-family:var(--f-body);font-size:13px;color:var(--ink-3);padding:5px 12px 4px;border:1px solid var(--paper-edge);border-radius:20px;background:rgba(255,250,236,.3)}
+.chip.on{color:var(--paper-hi);background:var(--ink-2);border-color:var(--ink-2)}
+.feed{padding:30px 0 20px}
+.card{position:relative;margin:0 22px 34px;padding:20px 18px 14px;background-color:var(--paper-hi);background-image:var(--noise);box-shadow:0 1px 1px rgba(60,40,15,.18),0 12px 18px -10px rgba(60,40,15,.5);transform:rotate(var(--rot,0deg));transition:transform .15s;cursor:pointer}
+.card:active{transform:rotate(var(--rot,0deg)) scale(.985)}
+.card::before{content:"";position:absolute;top:-11px;left:50%;width:78px;height:22px;margin-left:-39px;transform:rotate(-2.5deg);background:rgba(232,220,188,.75);box-shadow:0 1px 2px rgba(60,40,15,.2)}
+.card-top{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--rule);padding-bottom:7px;margin-bottom:13px}
+.card-who{font-family:var(--f-hand);font-size:23px;color:var(--pen)}
+.card-who.me{color:var(--rust)}
+.card-date{font-family:var(--f-display);font-style:italic;font-size:13px;color:var(--ink-3)}
+.card-main{display:flex;gap:14px;align-items:center}
+.card.stamped .card-main{padding-right:52px}
+.card-name{font-family:var(--f-display);font-size:21.5px;line-height:1.15;color:var(--ink);word-break:keep-all}
+.card-meta{font-size:12px;color:var(--ink-3);margin-top:3px}
+.card-stars{color:var(--brass);font-size:13.5px;letter-spacing:1.5px;margin-top:4px}
+.card .stamps{margin:13px 0 0}
+.card .stamps span{font-size:11.5px;padding:2px 7px 1px}
+.card-quote{font-family:var(--f-hand);font-size:23.5px;line-height:1.3;color:var(--pen);margin-top:10px;word-break:keep-all}
+.card-foot{display:flex;justify-content:space-between;margin-top:10px;padding-top:8px;border-top:1px dotted var(--ink-4);font-family:var(--f-display);font-style:italic;font-size:13px;color:var(--ink-3)}
+.seal-stamp{position:absolute;top:50px;right:12px;width:62px;height:62px;border-radius:50%;border:1.5px solid var(--rust);box-shadow:inset 0 0 0 3px var(--paper-hi),inset 0 0 0 4px var(--rust);display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(14deg);color:var(--rust);opacity:.8;pointer-events:none;line-height:1.15;text-align:center}
+.seal-stamp b{font-family:var(--f-sc);font-weight:400;font-size:9px;letter-spacing:.1em}
+.seal-stamp span{font-family:var(--f-body);font-weight:700;font-size:11px}
+.empty-note{text-align:center;padding:40px 30px;font-family:var(--f-display);font-style:italic;color:var(--ink-3);font-size:17px;line-height:1.6}
+.empty-note small{display:block;font-family:var(--f-body);font-style:normal;font-size:13px;margin-top:8px}
+
+/* ══════════════════════════════════════
+   SEARCH — 장부
+══════════════════════════════════════ */
+.ledger-search{margin:18px 22px 0;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--ink-2)}
+.ledger-search svg{width:18px;height:18px;stroke:var(--ink-3);fill:none;stroke-width:1.4;flex-shrink:0}
+.ledger-search .hand{border-bottom:none}
+.ledger-count{padding:12px 24px 0;font-family:var(--f-display);font-style:italic;font-size:13.5px;color:var(--ink-3)}
+.ledger{padding:4px 22px 30px}
+.lrow{display:flex;align-items:center;gap:12px;padding:12px 2px;border-bottom:1px dotted var(--ink-4);cursor:pointer}
+.lrow:active{background:rgba(80,50,20,.05)}
+.lrow-name{font-family:var(--f-display);font-size:18.5px;color:var(--ink);line-height:1.2}
+.lrow-meta{font-size:12px;color:var(--ink-3);margin-top:2px}
+.lrow-stars{margin-left:auto;color:var(--brass);font-size:12px;flex-shrink:0}
+
+/* ══════════════════════════════════════
+   GUIDE — 입문서
+══════════════════════════════════════ */
+.guide-intro{text-align:center;font-size:13.5px;line-height:1.8;color:var(--ink-3);margin-top:12px}
+.chapters{padding:18px 0 34px}
+.ch{border-top:1px solid var(--rule)}
+.ch:last-child{border-bottom:1px solid var(--rule)}
+.ch-head{display:flex;align-items:center;gap:14px;width:100%;padding:16px 22px;text-align:left}
+.ch-num{font-family:var(--f-display);font-size:25px;color:var(--rust);width:30px;text-align:center;flex-shrink:0}
+.ch-t{flex:1;min-width:0}
+.ch-t b{display:block;font-family:var(--f-body);font-weight:700;font-size:16.5px;color:var(--ink)}
+.ch-t i{font-family:var(--f-display);font-size:14px;color:var(--ink-3)}
+.ch-pm{font-family:var(--f-display);font-size:24px;color:var(--ink-3);transition:transform .2s;flex-shrink:0}
+.ch.open .ch-pm{transform:rotate(45deg)}
+.ch-body{display:none;padding:0 24px 22px 66px}
+.ch.open .ch-body{display:block;animation:fade .3s ease}
+.ch-body p{font-size:14px;line-height:1.85;color:var(--ink-2);margin-bottom:10px}
+.ch-body h4{font-family:var(--f-sc);font-weight:400;font-size:12.5px;letter-spacing:.16em;color:var(--ink-3);margin:16px 0 6px}
+.dl div{display:flex;gap:12px;padding:6px 0;border-bottom:1px dotted var(--paper-edge);font-size:13.5px;line-height:1.6}
+.dl dt{font-weight:700;color:var(--ink);flex-shrink:0;width:74px}
+.dl dd{color:var(--ink-2)}
+.steps{counter-reset:s;list-style:none;margin:4px 0 10px}
+.steps li{position:relative;padding-left:26px;margin-bottom:11px;font-size:14px;line-height:1.75;color:var(--ink-2)}
+.steps li::before{counter-increment:s;content:counter(s,lower-roman)".";position:absolute;left:0;font-family:var(--f-display);font-style:italic;color:var(--rust)}
+.steps li b{color:var(--ink)}
+.marg{font-family:var(--f-hand);font-size:21.5px;line-height:1.35;color:var(--pen);border-left:2px solid rgba(38,48,79,.3);padding:2px 0 2px 12px;margin:16px 0 4px;transform:rotate(-.4deg)}
+.chart{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin:6px 0 10px}
+.chart div{display:flex;align-items:center;gap:8px;font-family:var(--f-display);font-style:italic;font-size:14.5px;color:var(--ink-2)}
+.chart i{width:16px;height:16px;border-radius:50%;flex-shrink:0;box-shadow:inset 0 -2px 3px rgba(0,0,0,.22),0 0 0 1px rgba(60,40,15,.3)}
+.qa p b{display:block;color:var(--ink)}
+
+/* ── 쪽지 토스트 ── */
+.toast{position:absolute;left:50%;bottom:calc(var(--safe-bottom) + 86px);transform:translate(-50%,10px) rotate(-1deg);opacity:0;pointer-events:none;z-index:50;background-color:var(--paper-hi);background-image:var(--noise);border:1px solid var(--paper-edge);box-shadow:0 8px 18px -6px rgba(60,40,15,.55);padding:10px 18px;font-size:14px;color:var(--ink);white-space:nowrap;transition:opacity .25s,transform .25s}
+.toast.show{opacity:1;transform:translate(-50%,0) rotate(-1deg)}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+<!-- ═══════════ LANDING ═══════════ -->
+<section class="view active" id="view-landing">
+  <div class="scroll landing">
+    <div class="cert">
+      <span class="cn tl"></span><span class="cn tr"></span><span class="cn bl"></span><span class="cn br"></span>
+      <div class="cert-in">
+        <div class="kicker">Est. MMXXVI · Seoul</div>
+        <svg class="seal" width="92" height="92" viewBox="0 0 100 100" aria-hidden="true">
+          <defs><radialGradient id="sealg" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#A8432C"/><stop offset=".6" stop-color="#7E2A1A"/><stop offset="1" stop-color="#5A1A0F"/></radialGradient></defs>
+          <path d="M50 4C62 3 70 9 79 13C88 18 95 28 96 40C98 52 94 61 90 70C85 80 76 90 64 94C53 98 41 97 31 92C20 87 10 79 6 67C2 55 3 43 8 33C13 22 22 13 33 8C38 6 44 4 50 4Z" fill="url(#sealg)"/>
+          <circle cx="50" cy="50" r="33" fill="none" stroke="rgba(0,0,0,.28)" stroke-width="2"/>
+          <circle cx="49.4" cy="49.4" r="33" fill="none" stroke="rgba(255,200,170,.2)" stroke-width="1"/>
+          <text x="49.4" y="58.4" text-anchor="middle" font-family="IM Fell English, serif" font-size="26" fill="rgba(255,190,160,.28)">W·K</text>
+          <text x="50" y="59" text-anchor="middle" font-family="IM Fell English, serif" font-size="26" fill="#4A140A">W·K</text>
+        </svg>
+        <h1 class="cert-title">We's <i>Keys</i></h1>
+        <div class="cert-sub">A Ledger of Drams</div>
+        <div class="orn">❦</div>
+        <p class="cert-desc">마신 위스키를 기록하고,<br>같은 잔을 기울인 사람들과 나눠보세요.</p>
+        <div class="cert-foot">Whisky Tasting Archive</div>
+      </div>
+    </div>
+
+    <div class="login">
+      <span class="kicker">— Enter —</span>
+      <button class="lbtn kakao" onclick="login('kakao')">
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#191600" d="M12 3C6.5 3 2 6.6 2 11c0 2.8 1.9 5.3 4.7 6.7l-1 3.6c-.1.3.3.6.6.4l4.2-2.8c.5.1 1 .1 1.5.1 5.5 0 10-3.6 10-8S17.5 3 12 3z"/></svg>
+        카카오로 시작하기
+      </button>
+      <button class="lbtn google" onclick="login('google')">
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Google로 시작하기
+      </button>
+      <p class="terms">시작하면 <a href="#">이용약관</a> 및 <a href="#">개인정보처리방침</a>에<br>동의하는 것으로 간주됩니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ CELLAR ═══════════ -->
+<section class="view cellar" id="view-archive">
+  <div class="cellar-head">
+    <div class="plate">My Cellar</div>
+    <div class="cellar-sub" id="cellarSub"></div>
+    <button class="brass-add" onclick="newNote()" aria-label="새 기록">+</button>
+  </div>
+  <div class="scroll"><div class="shelves" id="shelves"></div></div>
+</section>
+
+<!-- ═══════════ EXCHANGE ═══════════ -->
+<section class="view" id="view-feed">
+  <div class="scroll" id="feedScroll">
+    <header class="page-head">
+      <div class="kicker">The Tasting Exchange</div>
+      <h1>다른 사람들의 노트</h1>
+      <div class="sub">same dram, different memories</div>
+      <div class="orn">❦</div>
+    </header>
+    <div class="notice">지금 보이는 다른 사람의 노트는 <b>예시</b>예요. 서버가 연결되면 실제 공개 노트로 바뀝니다.<br>내 노트 중 ‘전체 공개’로 저장한 것도 여기에 함께 실려요.</div>
+    <div class="chips" id="feedChips">
+      <button class="chip on" data-f="all" onclick="setFeedFilter(this)">전체</button>
+      <button class="chip" data-f="same" onclick="setFeedFilter(this)">내가 마신 위스키</button>
+      <button class="chip" data-f="top" onclick="setFeedFilter(this)">★ 5</button>
+      <button class="chip" data-f="mine" onclick="setFeedFilter(this)">내 공개 노트</button>
+    </div>
+    <div class="feed" id="feedList"></div>
+  </div>
+</section>
+
+<!-- ═══════════ SEARCH ═══════════ -->
+<section class="view" id="view-search">
+  <div class="scroll">
+    <header class="page-head">
+      <div class="kicker">Index</div>
+      <h1>내 기록 찾기</h1>
+      <div class="orn">❦</div>
+    </header>
+    <div class="ledger-search">
+      <svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5.5 5.5"/></svg>
+      <input class="hand" id="q" type="text" placeholder="이름이나 증류소로 찾기" oninput="renderSearch()" autocomplete="off">
+    </div>
+    <div class="chips" id="searchChips">
+      <button class="chip on" data-f="all" onclick="setSearchFilter(this)">전체</button>
+      <button class="chip" data-f="malt" onclick="setSearchFilter(this)">싱글 몰트</button>
+      <button class="chip" data-f="blend" onclick="setSearchFilter(this)">블렌디드</button>
+      <button class="chip" data-f="bourbon" onclick="setSearchFilter(this)">버번</button>
+      <button class="chip" data-f="five" onclick="setSearchFilter(this)">★ 5</button>
+      <button class="chip" data-f="four" onclick="setSearchFilter(this)">★ 4 이상</button>
+    </div>
+    <div class="ledger-count" id="searchCount"></div>
+    <div class="ledger" id="searchList"></div>
+  </div>
+</section>
+
+<!-- ═══════════ GUIDE ═══════════ -->
+<section class="view" id="view-guide">
+  <div class="scroll">
+    <header class="page-head">
+      <div class="kicker">A Primer</div>
+      <h1>테이스팅 가이드</h1>
+      <div class="sub">first sip, first note</div>
+      <div class="orn">❦</div>
+    </header>
+    <p class="guide-intro">첫 술에 배부르는 위스키 테이스팅 노트 작성법.<br>한 장씩 펼쳐 읽어보세요.</p>
+
+    <div class="chapters">
+      <div class="ch">
+        <button class="ch-head" onclick="toggleCh(this)"><span class="ch-num">¶</span><span class="ch-t"><b>왜 기록하는가</b><i>Preface</i></span><span class="ch-pm">+</span></button>
+        <div class="ch-body">
+          <p>위스키의 향과 맛은 마시는 순간 피어났다가 금세 흩어집니다. 휘발되는 기억을 기록으로 붙잡아 두는 것, 그것이 테이스팅 노트의 궁극적인 목적이에요.</p>
+          <dl class="dl">
+            <div><dt>기억의 확장</dt><dd>그날의 한 잔을 언제든 다시 꺼내볼 수 있어요.</dd></div>
+            <div><dt>취향의 발견</dt><dd>기록이 쌓이면 내가 어떤 위스키를 좋아하는지 보입니다.</dd></div>
+            <div><dt>성장의 기록</dt><dd>처음엔 "달다"였던 표현이 점점 섬세해져요.</dd></div>
+          </dl>
+          <div class="marg">처음부터 완벽할 필요 없어요. '달다', '연기 냄새' 한 마디면 충분합니다.</div>
+        </div>
+      </div>
+
+      <div class="ch">
+        <button class="ch-head" onclick="toggleCh(this)"><span class="ch-num">I</span><span class="ch-t"><b>준비</b><i>Setting</i></span><span class="ch-pm">+</span></button>
+        <div class="ch-body">
+          <p>테이스팅 전, 향과 맛을 방해하지 않는 환경부터 만들어요.</p>
+          <h4>Things to prepare</h4>
+          <dl class="dl">
+            <div><dt>글라스</dt><dd>글렌캐런 글라스 — 입구가 좁아 향이 모이는 튤립형</dd></div>
+            <div><dt>위스키</dt><dd>오늘 기록할 한 잔</dd></div>
+            <div><dt>물</dt><dd>향을 열어줄 물 몇 방울</dd></div>
+            <div><dt>원두</dt><dd>후각을 리셋하는 용도</dd></div>
+            <div><dt>무향 크래커</dt><dd>입안을 정리하는 용도</dd></div>
+            <div><dt>노트와 펜</dt><dd>혹은 이 기록장</dd></div>
+          </dl>
+          <h4>Surroundings</h4>
+          <dl class="dl">
+            <div><dt>온도</dt><dd>실온 18–22°C 권장</dd></div>
+            <div><dt>공간</dt><dd>향수, 디퓨저 등이 없는 곳</dd></div>
+            <div><dt>조명</dt><dd>너무 강하지 않은 조명이나 자연광</dd></div>
+          </dl>
+          <div class="marg">글렌캐런 글라스가 없다면 입구가 좁아지는 와인 글라스로도 충분해요.</div>
+        </div>
+      </div>
+
+      <div class="ch">
+        <button class="ch-head" onclick="toggleCh(this)"><span class="ch-num">II</span><span class="ch-t"><b>보기</b><i>Appearance</i></span><span class="ch-pm">+</span></button>
+        <div class="ch-body">
+          <ol class="steps">
+            <li><b>색</b> — 흰 종이를 배경 삼아 잔을 살짝 기울여 보세요. 숙성 기간과 캐스크에 따라 색이 달라집니다.</li>
+            <li><b>레그 (Legs)</b> — 잔을 한 번 돌린 뒤 벽면을 타고 흘러내리는 줄기예요. 위스키 속 물과 알코올의 표면장력 차이로 생깁니다. 굵고 천천히 흐를수록 점도가 높고 바디감이 묵직한 편, 얇고 빠르면 가벼운 편이에요.</li>
+          </ol>
+          <h4>Colour Chart</h4>
+          <div class="chart" id="guideChart"></div>
+          <div class="marg">색이 짙다고 꼭 오래 숙성된 건 아니에요. 캐러멜 색소(E150a)를 넣는 경우도 있으니까요.</div>
+        </div>
+      </div>
+
+      <div class="ch">
+        <button class="ch-head" onclick="toggleCh(this)"><span class="ch-num">III</span><span class="ch-t"><b>맡기</b><i>Nose</i></span><span class="ch-pm">+</span></button>
+        <div class="ch-body">
+          <ol class="steps">
+            <li><b>코만 살짝 갖다 대기</b> — 첫인상을 잡아요. 알코올이 코를 찌르면 잠깐 떨어졌다가 다시.</li>
+            <li><b>글라스를 돌리면서</b> — 숨어 있던 향이 올라와요. 달라진 향이 있다면 적어두세요.</li>
+            <li><b>물 한 방울 (선택)</b> — 도수가 높을수록 효과가 커요. 물 전후의 향을 비교해보세요.</li>
+          </ol>
+          <h4>Aroma Vocabulary</h4>
+          <dl class="dl" id="guideAroma"></dl>
+          <div class="marg">아로마 휠을 참고해도 좋고, "할머니 댁 다락방 냄새"처럼 기억 속 향을 그대로 적어도 괜찮아요.</div>
+        </div>
+      </div>
+
+      <div class="ch">
+        <button class="ch-head" onclick="toggleCh(this)"><span class="ch-num">IV</span><span class="ch-t"><b>맛보기</b><i>Taste</i></span><span class="ch-pm">+</span></button>
+        <div class="ch-body">
+          <ol class="steps">
+            <li><b>어떤 맛이 나는가</b> — Palate. 한 모금 머금고 혀 전체로 굴려보세요.</li>
+            <li><b>목넘김은 어떤가</b> — Mouthfeel. 물처럼 가벼운지, 기름지고 묵직한지.</li>
+            <li><b>여운은 얼마나, 어떤 느낌으로</b> — Finish. 길이(짧게·길게), 남는 맛, 그 느낌까지.</li>
+          </ol>
+          <div class="marg">여러 잔을 연달아 마신다면 사이사이 원두 향을 맡고, 크래커 한 조각으로 입을 정리하세요.</div>
+        </div>
+      </div>
+
+      <div class="ch">
+        <button class="ch-head" onclick="toggleCh(this)"><span class="ch-num">V</span><span class="ch-t"><b>종합 평가</b><i>Assessment</i></span><span class="ch-pm">+</span></button>
+        <div class="ch-body">
+          <p>마지막으로 이 한 잔에 대한 생각을 정리해요. 정해진 형식은 없습니다.</p>
+          <dl class="dl">
+            <div><dt>점수</dt><dd>별점이나 10점 척도로 정량화</dd></div>
+            <div><dt>한 줄 평</dt><dd>이 위스키를 한 문장으로</dd></div>
+            <div><dt>재구매 의향</dt><dd>꼭 산다 · 기회되면 · 선물용으로 · 안 산다</dd></div>
+            <div><dt>페어링</dt><dd>어울릴 것 같은 음식</dd></div>
+            <div><dt>자유 서술</dt><dd>그날의 분위기, 함께 마신 사람까지</dd></div>
+          </dl>
+          <div class="marg">나중에 다시 펼쳤을 때 가장 먼저 눈에 들어오는 건 결국 한 줄 평이에요.</div>
+        </div>
+      </div>
+
+      <div class="ch">
+        <button class="ch-head" onclick="toggleCh(this)"><span class="ch-num">∗</span><span class="ch-t"><b>자주 묻는 질문</b><i>Appendix</i></span><span class="ch-pm">+</span></button>
+        <div class="ch-body qa">
+          <p><b>Q. 향을 잘 모르겠어요.</b>느낀 그대로 적으면 돼요. 반복할수록 표현이 늘어요.</p>
+          <p><b>Q. 노트를 꽉 채워야 하나요?</b>아니요. ‘빠른 기록’에서 태그와 별점, 한 줄 평만으로도 충분한 기록이 됩니다.</p>
+          <p><b>Q. 물을 넣어도 되나요?</b>네. 특히 46% 이상 높은 도수라면 한두 방울이 향을 열어줘요.</p>
+          <p><b>Q. 하이볼로 마시면서도 기록할 수 있나요?</b>물론이요. 다만 니트로 한 모금 먼저 기록한 뒤 즐기는 걸 추천해요.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ DETAIL ═══════════ -->
+<section class="view" id="view-detail">
+  <div class="bar">
+    <button class="link-btn" onclick="goBack()">← 돌아가기</button>
+    <div class="bar-title">Tasting Note</div>
+    <div class="bar-right" id="detailRight"></div>
+  </div>
+  <div class="scroll" id="detailScroll"></div>
+</section>
+
+<!-- ═══════════ FORM ═══════════ -->
+<section class="view" id="view-form">
+  <div class="bar">
+    <button class="link-btn" onclick="go('archive')">← 셀러로</button>
+    <div class="bar-title" id="formTitle">New Entry</div>
+    <div class="bar-right"><button class="stamp-btn" onclick="saveNote()">저장</button></div>
+  </div>
+  <div class="scroll" id="formScroll">
+    <div class="mode">
+      <button id="mBasic" class="on" onclick="setMode('basic')">빠른 기록</button>
+      <button id="mDetail" onclick="setMode('detail')">상세 기록</button>
+    </div>
+
+    <!-- 위스키 -->
+    <div class="sec">
+      <div class="sec-head"><div class="sec-num">Prelude</div><div class="sec-ttl">어떤 위스키인가요<em>The Bottle</em></div></div>
+      <div class="field lookup">
+        <label class="lbl" for="f_name">Whisky<small>이름</small></label>
+        <div class="lookup-row">
+          <svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5.5 5.5"/></svg>
+          <input class="hand" id="f_name" type="text" placeholder="이름을 적으면 도감에서 찾아드려요" oninput="onLookup(this.value)" autocomplete="off">
+          <i class="spin" id="spin"></i>
+        </div>
+        <div class="suggest" id="suggest"></div>
+        <div class="autofill" id="autofill">✦ 도감에서 불러왔어요</div>
+      </div>
+      <div id="autoInfo" style="display:none">
+        <div class="row">
+          <div class="field"><label class="lbl">Distillery<small>증류소</small></label><input class="hand" id="f_distillery" type="text"></div>
+          <div class="field"><label class="lbl">Origin<small>산지</small></label><input class="hand" id="f_origin" type="text"></div>
+        </div>
+        <div class="row">
+          <div class="field"><label class="lbl">Age<small>년</small></label><input class="hand" id="f_age" type="number" inputmode="numeric" min="0" max="100" placeholder="—"></div>
+          <div class="field"><label class="lbl">ABV<small>%</small></label><input class="hand" id="f_abv" type="number" inputmode="decimal" step="0.1" min="0" max="100"></div>
+          <div class="field"><label class="lbl">Type<small>종류</small></label><input class="hand" id="f_category" type="text"></div>
+        </div>
+      </div>
+      <div class="field"><label class="lbl" for="f_date">Date<small>마신 날</small></label><input class="hand" id="f_date" type="date"></div>
+    </div>
+
+    <!-- I 보기 -->
+    <div class="sec">
+      <div class="sec-head"><div class="sec-num">Step I</div><div class="sec-ttl">보기<em>Appearance</em></div></div>
+      <div class="field">
+        <span class="lbl">Colour<small>색</small></span>
+        <div class="swatches" id="swatches"></div>
+        <div class="picked" id="picked"></div>
+      </div>
+      <div class="field">
+        <span class="lbl">Legs &amp; Viscosity<small>점도</small></span>
+        <div class="vis-ends"><span>thin · 묽음</span><span>very oily · 진함</span></div>
+        <input type="range" class="range" id="vis" min="1" max="10" value="5" oninput="updateVis(this.value)">
+        <div class="ticks"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="vis-val" id="visVal"></div>
+      </div>
+    </div>
+
+    <!-- II 맡기 -->
+    <div class="sec">
+      <div class="sec-head"><div class="sec-num">Step II</div><div class="sec-ttl">맡기<em>Nose</em></div></div>
+      <div class="field">
+        <span class="lbl">Aroma<small>느껴지는 향을 모두 골라주세요</small></span>
+        <div class="tags" id="aromaTags"></div>
+        <div class="hint" id="aromaHint"></div>
+        <div class="etc" id="aromaEtc">
+          <input class="hand" id="aromaEtcInput" type="text" placeholder="목록에 없는 향" onkeydown="etcKey(event,'aroma')">
+          <button class="mini-stamp" onclick="addEtc('aroma')">추가</button>
+        </div>
+        <div class="custom" id="aromaCustom"></div>
+      </div>
+      <div class="field">
+        <span class="lbl">First Impression<small>첫인상</small></span>
+        <textarea class="sheet" id="f_nose1" rows="3" placeholder="코를 대자마자 가장 먼저 느껴진 향은?"></textarea>
+      </div>
+      <div class="field more">
+        <span class="lbl">After Water<small>물 한 방울 후</small></span>
+        <textarea class="sheet" id="f_nose2" rows="3" placeholder="물을 더한 뒤 달라진 향이 있었나요?"></textarea>
+      </div>
+    </div>
+
+    <!-- III 맛보기 -->
+    <div class="sec">
+      <div class="sec-head"><div class="sec-num">Step III</div><div class="sec-ttl">맛보기<em>Taste</em></div></div>
+      <div class="field">
+        <span class="lbl">Flavour<small>느껴지는 맛을 골라주세요</small></span>
+        <div class="tags" id="flavourTags"></div>
+        <div class="hint" id="flavourHint"></div>
+        <div class="etc" id="flavourEtc">
+          <input class="hand" id="flavourEtcInput" type="text" placeholder="목록에 없는 맛" onkeydown="etcKey(event,'flavour')">
+          <button class="mini-stamp" onclick="addEtc('flavour')">추가</button>
+        </div>
+        <div class="custom" id="flavourCustom"></div>
+      </div>
+      <div class="field">
+        <span class="lbl">Palate<small>어떤 맛이 나나요</small></span>
+        <textarea class="sheet" id="f_palate" rows="3" placeholder="혀 위에서 굴렸을 때 느껴지는 맛"></textarea>
+      </div>
+      <div class="field more">
+        <span class="lbl">Mouthfeel<small>목넘김</small></span>
+        <textarea class="sheet" id="f_mouthfeel" rows="2" placeholder="가볍나요, 기름지고 묵직한가요?"></textarea>
+      </div>
+      <div class="field">
+        <span class="lbl">Finish<small>여운</small></span>
+        <textarea class="sheet" id="f_finish" rows="2" placeholder="삼킨 뒤 얼마나 오래, 어떤 맛이 남나요?"></textarea>
+      </div>
+    </div>
+
+    <!-- IV 종합 평가 -->
+    <div class="sec">
+      <div class="sec-head"><div class="sec-num">Step IV</div><div class="sec-ttl">종합 평가<em>Assessment</em></div></div>
+      <div class="field">
+        <span class="lbl">Score<small>별점</small></span>
+        <div class="stars" id="stars">
+          <button class="star" onclick="setScore(1)">★</button><button class="star" onclick="setScore(2)">★</button><button class="star" onclick="setScore(3)">★</button><button class="star" onclick="setScore(4)">★</button><button class="star" onclick="setScore(5)">★</button>
+          <span class="star-lbl" id="starLbl"></span>
+        </div>
+      </div>
+      <div class="field">
+        <span class="lbl">Would buy again<small>재구매 의향</small></span>
+        <div class="opts" id="rebuyOpts">
+          <span class="opt" data-v="꼭 산다" onclick="setOpt(this)">꼭 산다</span>
+          <span class="opt" data-v="기회되면" onclick="setOpt(this)">기회되면</span>
+          <span class="opt" data-v="선물용으로" onclick="setOpt(this)">선물용으로</span>
+          <span class="opt" data-v="안 산다" onclick="setOpt(this)">안 산다</span>
+        </div>
+      </div>
+      <div class="field">
+        <span class="lbl">In a word<small>한 줄 평</small></span>
+        <input class="hand" id="f_oneliner" type="text" placeholder="이 위스키를 한 문장으로">
+      </div>
+      <div class="field more">
+        <span class="lbl">Pairing<small>페어링</small></span>
+        <input class="hand" id="f_pairing" type="text" placeholder="다크 초콜릿, 훈제 연어…">
+      </div>
+      <div class="field more">
+        <span class="lbl">Notes<small>남겨두고 싶은 것</small></span>
+        <textarea class="sheet" id="f_notes" rows="3" placeholder="그날의 분위기, 함께 마신 사람, 다음에 마셔볼 것…"></textarea>
+      </div>
+      <div class="field">
+        <span class="lbl">Visibility<small>공개 설정</small></span>
+        <div class="opts" id="privacyOpts">
+          <span class="opt on" data-v="public" onclick="setOpt(this)">전체 공개</span>
+          <span class="opt" data-v="private" onclick="setOpt(this)">나만 보기</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="expand" id="expandBtn" onclick="setMode(detailOpen ? 'basic' : 'detail')"><i>❧</i><span>상세 기록 펼치기</span></button>
+  </div>
+</section>
+
+<!-- ═══════════ TAB BAR ═══════════ -->
+<nav class="tabbar" id="tabbar">
+  <button class="tab" data-v="archive" onclick="go('archive')">
+    <svg viewBox="0 0 24 24"><path d="M10 2.5h4V6l2.2 3.2V20a1.5 1.5 0 0 1-1.5 1.5H9.3A1.5 1.5 0 0 1 7.8 20V9.2L10 6z"/><path d="M7.8 12.5h8.4M7.8 17h8.4"/></svg>
+    <span>내 셀러</span>
+  </button>
+  <button class="tab" data-v="feed" onclick="go('feed')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="6.5" width="13" height="15" rx=".8"/><path d="M8 3.5h12.2v15"/><path d="M6 11h7M6 14h7M6 17h4.5"/></svg>
+    <span>둘러보기</span>
+  </button>
+  <button class="tab" data-v="search" onclick="go('search')">
+    <svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5.5 5.5"/></svg>
+    <span>찾기</span>
+  </button>
+  <button class="tab" data-v="guide" onclick="go('guide')">
+    <svg viewBox="0 0 24 24"><path d="M3 5.5c3-1.5 6-1.5 9 0v14c-3-1.5-6-1.5-9 0z"/><path d="M21 5.5c-3-1.5-6-1.5-9 0v14c3-1.5 6-1.5 9 0z"/></svg>
+    <span>가이드</span>
+  </button>
+</nav>
+
+<div class="toast" id="toast"></div>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   DATA
+══════════════════════════════════════ */
+const AROMAS = [
+  ['바닐라','달콤하고 부드러운 크림 같은 향'],['카라멜','눌어붙은 설탕의 진한 단내'],['오크','나무, 연필 깎은 향, 탄닌'],
+  ['건과일','건포도·무화과·대추'],['셰리','셰리 캐스크 특유의 와인 같은 단향'],['스모키','장작, 모닥불, 훈제'],
+  ['피트','흙·약품·정로환 같은 향'],['허브','민트·풀·약초'],['꽃향','장미·헤더 같은 꽃'],
+  ['시트러스','레몬·오렌지 껍질'],['곡물','빵, 시리얼, 몰트'],['너트','아몬드·호두 같은 고소함'],
+  ['스파이스','후추·정향·시나몬'],['초콜릿','다크 초콜릿, 코코아'],['바다/요오드','바닷바람, 해초, 소금기'],
+  ['버터','버터, 크림'],['가죽','가죽, 담뱃잎'],['토피','버터 캐러멜, 엿']
+];
+const FLAVOURS = [
+  ['달콤함','꿀이나 설탕 같은 단맛'],['쌉쌀함','다크 초콜릿·커피 같은 쓴맛'],['산미','과일 같은 산뜻한 신맛'],
+  ['짭짤함','바다 같은 짠맛'],['스파이시','혀를 찌르는 알싸함'],['풍부함','입안을 가득 채우는 묵직함'],
+  ['섬세함','가볍고 결이 고운'],['크리미','부드럽고 기름진 질감'],['드라이','침이 마르는 듯 떫은 마무리'],
+  ['워밍','목을 타고 퍼지는 따뜻함']
+];
+const COLORS = [
+  ['gin clear','#FDFBF0','gin clear'],['pale straw','#F7EFB0','pale straw'],['pale gold','#EDD96A','pale gold'],
+  ['yellow gold','#D4A830','yel. gold'],['old gold','#C08020','old gold'],['amber','#C06010','amber'],
+  ['deep copper','#A84A10','d. copper'],['burnished','#8B3010','burnish.'],['chestnut','#7A1A20','chestnut'],
+  ['tawny','#5C1010','tawny'],['treacle','#3A0A08','treacle']
+];
+const VIS = {1:'Thin',2:'Thin',3:'Light',4:'Light-Medium',5:'Medium',6:'Medium-Heavy',7:'Thick',8:'Thick',9:'Oily',10:'Very Oily'};
+const SCORE_LBL = ['','마음에 들지 않아요','그저 그래요','괜찮아요','좋아요','최고예요'];
+
+/* 다른 사람들의 노트 — 서버 연동 전 예시 데이터 */
+const SAMPLE_NOTES = [
+  {id:'s1',author:'피트중독자',name:'Laphroaig 10',distillery:'Laphroaig',origin:'Islay, Scotland',age:'10',abv:'40',category:'Single Malt',date:'2026-10-24',color:'pale gold',colorBg:'#EDD96A',viscosity:5,aromaTags:['피트','스모키','바다/요오드','바닐라'],flavourTags:['짭짤함','스파이시','드라이'],nose1:'정로환, 젖은 모닥불, 해초. 잔을 돌리니 바닐라가 살짝 올라온다',palate:'짭짤한 바닷물 뒤로 바닐라 단맛이 숨어 있음',finish:'길고 스모키하게, 입안에 연기가 오래 남는다',score:5,rebuy:'꼭 산다',oneliner:'병원 소독약 냄새인데 왜 자꾸 생각나지',pairing:'굴, 훈제 연어'},
+  {id:'s2',author:'위린이3개월',name:'Laphroaig 10',distillery:'Laphroaig',origin:'Islay, Scotland',age:'10',abv:'40',category:'Single Malt',date:'2026-10-19',color:'pale gold',colorBg:'#EDD96A',viscosity:4,aromaTags:['스모키','허브'],flavourTags:['쌉쌀함','워밍'],nose1:'코를 대자마자 연기 냄새가 확',palate:'연기 맛이 너무 세서 다른 맛은 잘 모르겠다',finish:'목이 뜨겁고 연기가 오래 남음',score:2,rebuy:'안 산다',oneliner:'아직은 무섭다… 근데 궁금하긴 함'},
+  {id:'s3',author:'셰리러버',name:'The Macallan 12 Double Cask',distillery:'The Macallan',origin:'Speyside, Scotland',age:'12',abv:'40',category:'Single Malt',date:'2026-10-21',color:'amber',colorBg:'#C06010',viscosity:6,aromaTags:['셰리','건과일','카라멜','오크'],flavourTags:['달콤함','풍부함','스파이시'],nose1:'건포도, 말린 무화과, 오렌지 껍질',palate:'꿀과 생강, 끝에 오크의 떫음',finish:'중간 길이, 생강 같은 스파이스',score:4,rebuy:'기회되면',oneliner:'크리스마스 케이크 한 조각'},
+  {id:'s4',author:'바텐더K',name:'The Macallan 12 Double Cask',distillery:'The Macallan',origin:'Speyside, Scotland',age:'12',abv:'40',category:'Single Malt',date:'2026-10-08',color:'old gold',colorBg:'#C08020',viscosity:6,aromaTags:['건과일','바닐라','토피'],flavourTags:['달콤함','크리미'],palate:'셰리의 단맛과 버번 캐스크의 바닐라가 반반',finish:'부드럽고 짧은 편',score:4,rebuy:'선물용으로',oneliner:'셰리와 버번의 균형이 생각보다 좋음',pairing:'다크 초콜릿'},
+  {id:'s5',author:'버번키드',name:'Buffalo Trace',distillery:'Buffalo Trace',origin:'Kentucky, USA',age:'',abv:'45',category:'Bourbon',date:'2026-10-26',color:'amber',colorBg:'#C06010',viscosity:7,aromaTags:['바닐라','카라멜','오크','스파이스'],flavourTags:['달콤함','스파이시','워밍'],palate:'꿀, 바닐라, 시나몬 사탕',finish:'달콤하게 시작해서 후추로 끝남',score:4,rebuy:'꼭 산다',oneliner:'가성비 버번의 정석'},
+  {id:'s6',author:'셰리러버',name:'GlenDronach 12',distillery:'GlenDronach',origin:'Speyside, Scotland',age:'12',abv:'43',category:'Single Malt',date:'2026-10-14',color:'deep copper',colorBg:'#A84A10',viscosity:7,aromaTags:['셰리','초콜릿','건과일','너트'],flavourTags:['풍부함','달콤함'],nose1:'체리 잼, 코코아, 호두',palate:'건자두와 초콜릿, 묵직하다',score:5,rebuy:'꼭 산다',oneliner:'셰리 폭탄 입문용으로 최고'},
+  {id:'s7',author:'위린이3개월',name:'Glenfiddich 12',distillery:'Glenfiddich',origin:'Speyside, Scotland',age:'12',abv:'40',category:'Single Malt',date:'2026-10-02',color:'pale gold',colorBg:'#EDD96A',viscosity:3,aromaTags:['꽃향','시트러스','곡물'],flavourTags:['섬세함','달콤함'],nose1:'서양배, 풋사과',palate:'가볍고 깔끔한 단맛',score:4,rebuy:'기회되면',oneliner:'처음 마셔본 싱글몰트. 배 향이 난다!'},
+  {id:'s8',author:'섬마을',name:'Talisker 10',distillery:'Talisker',origin:'Isle of Skye, Scotland',age:'10',abv:'45.8',category:'Single Malt',date:'2026-10-17',color:'yellow gold',colorBg:'#D4A830',viscosity:6,aromaTags:['바다/요오드','스모키','스파이스'],flavourTags:['짭짤함','스파이시','워밍'],finish:'혀끝이 찌릿하게, 길게',score:5,rebuy:'꼭 산다',oneliner:'후추 뿌린 바닷바람'},
+  {id:'s9',author:'바텐더K',name:'Yamazaki 12',distillery:'Suntory',origin:'Japan',age:'12',abv:'43',category:'Single Malt',date:'2026-09-28',color:'yellow gold',colorBg:'#D4A830',viscosity:5,aromaTags:['꽃향','시트러스','오크','허브'],flavourTags:['섬세함','달콤함','드라이'],nose1:'복숭아, 백단향, 은은한 꽃',score:4,rebuy:'선물용으로',oneliner:'단정하고 섬세한, 미즈나라의 향'},
+  {id:'s10',author:'섬마을',name:'Ardbeg 10',distillery:'Ardbeg',origin:'Islay, Scotland',age:'10',abv:'46',category:'Single Malt',date:'2026-09-20',color:'pale straw',colorBg:'#F7EFB0',viscosity:5,aromaTags:['피트','시트러스','스모키'],flavourTags:['달콤함','스파이시','드라이'],palate:'레몬 사탕과 타르, 의외로 달다',score:4,rebuy:'기회되면',oneliner:'레몬 짜 넣은 모닥불'},
+  {id:'s11',author:'버번키드',name:'The Balvenie DoubleWood 12',distillery:'The Balvenie',origin:'Speyside, Scotland',age:'12',abv:'40',category:'Single Malt',date:'2026-09-15',color:'old gold',colorBg:'#C08020',viscosity:5,aromaTags:['바닐라','셰리','너트','토피'],flavourTags:['크리미','달콤함'],score:3,rebuy:'기회되면',oneliner:'무난하게 맛있는데 임팩트는 약함'}
+];
+
+/* 위스키 도감 (자체 DB) */
+const WHISKY_DB = [
+  // ── SPEYSIDE ──
+  {name:'Glenfiddich 12',distillery:'Glenfiddich',origin:'Speyside, Scotland',age:'12',abv:'40',category:'Single Malt'},
+  {name:'Glenfiddich 15 Solera',distillery:'Glenfiddich',origin:'Speyside, Scotland',age:'15',abv:'40',category:'Single Malt'},
+  {name:'Glenfiddich 18',distillery:'Glenfiddich',origin:'Speyside, Scotland',age:'18',abv:'40',category:'Single Malt'},
+  {name:'Glenfiddich 21 Gran Reserva',distillery:'Glenfiddich',origin:'Speyside, Scotland',age:'21',abv:'40',category:'Single Malt'},
+  {name:'The Macallan 12 Double Cask',distillery:'The Macallan',origin:'Speyside, Scotland',age:'12',abv:'40',category:'Single Malt'},
+  {name:'The Macallan 12 Sherry Oak',distillery:'The Macallan',origin:'Speyside, Scotland',age:'12',abv:'43',category:'Single Malt'},
+  {name:'The Macallan 18 Sherry Oak',distillery:'The Macallan',origin:'Speyside, Scotland',age:'18',abv:'43',category:'Single Malt'},
+  {name:'The Macallan 18 Double Cask',distillery:'The Macallan',origin:'Speyside, Scotland',age:'18',abv:'43',category:'Single Malt'},
+  {name:'The Macallan Rare Cask',distillery:'The Macallan',origin:'Speyside, Scotland',age:'',abv:'43',category:'Single Malt'},
+  {name:'The Balvenie DoubleWood 12',distillery:'The Balvenie',origin:'Speyside, Scotland',age:'12',abv:'40',category:'Single Malt'},
+  {name:'The Balvenie Caribbean Cask 14',distillery:'The Balvenie',origin:'Speyside, Scotland',age:'14',abv:'43',category:'Single Malt'},
+  {name:'The Balvenie PortWood 21',distillery:'The Balvenie',origin:'Speyside, Scotland',age:'21',abv:'40',category:'Single Malt'},
+  {name:'Aberlour 12',distillery:'Aberlour',origin:'Speyside, Scotland',age:'12',abv:'40',category:'Single Malt'},
+  {name:'Aberlour A\'bunadh',distillery:'Aberlour',origin:'Speyside, Scotland',age:'',abv:'61.5',category:'Single Malt'},
+  {name:'Glenlivet 12',distillery:'The Glenlivet',origin:'Speyside, Scotland',age:'12',abv:'40',category:'Single Malt'},
+  {name:'Glenlivet 15 French Oak',distillery:'The Glenlivet',origin:'Speyside, Scotland',age:'15',abv:'40',category:'Single Malt'},
+  {name:'Glenlivet 18',distillery:'The Glenlivet',origin:'Speyside, Scotland',age:'18',abv:'40',category:'Single Malt'},
+  {name:'GlenDronach 12',distillery:'GlenDronach',origin:'Speyside, Scotland',age:'12',abv:'43',category:'Single Malt'},
+  {name:'GlenDronach 15 Revival',distillery:'GlenDronach',origin:'Speyside, Scotland',age:'15',abv:'46',category:'Single Malt'},
+  {name:'GlenDronach 18 Allardice',distillery:'GlenDronach',origin:'Speyside, Scotland',age:'18',abv:'46',category:'Single Malt'},
+  {name:'Glenrothes 12',distillery:'The Glenrothes',origin:'Speyside, Scotland',age:'12',abv:'40',category:'Single Malt'},
+  {name:'Glenrothes Whisky Maker\'s Cut',distillery:'The Glenrothes',origin:'Speyside, Scotland',age:'',abv:'48.8',category:'Single Malt'},
+  {name:'Craigellachie 13',distillery:'Craigellachie',origin:'Speyside, Scotland',age:'13',abv:'46',category:'Single Malt'},
+  {name:'BenRiach 10 The Original',distillery:'BenRiach',origin:'Speyside, Scotland',age:'10',abv:'43',category:'Single Malt'},
+  {name:'Cardhu 12',distillery:'Cardhu',origin:'Speyside, Scotland',age:'12',abv:'40',category:'Single Malt'},
+
+  // ── ISLAY ──
+  {name:'Laphroaig 10',distillery:'Laphroaig',origin:'Islay, Scotland',age:'10',abv:'40',category:'Single Malt'},
+  {name:'Laphroaig 10 Cask Strength',distillery:'Laphroaig',origin:'Islay, Scotland',age:'10',abv:'57.4',category:'Single Malt'},
+  {name:'Laphroaig Quarter Cask',distillery:'Laphroaig',origin:'Islay, Scotland',age:'',abv:'48',category:'Single Malt'},
+  {name:'Laphroaig Lore',distillery:'Laphroaig',origin:'Islay, Scotland',age:'',abv:'48',category:'Single Malt'},
+  {name:'Ardbeg 10',distillery:'Ardbeg',origin:'Islay, Scotland',age:'10',abv:'46',category:'Single Malt'},
+  {name:'Ardbeg Uigeadail',distillery:'Ardbeg',origin:'Islay, Scotland',age:'',abv:'54.2',category:'Single Malt'},
+  {name:'Ardbeg Corryvreckan',distillery:'Ardbeg',origin:'Islay, Scotland',age:'',abv:'57.1',category:'Single Malt'},
+  {name:'Ardbeg An Oa',distillery:'Ardbeg',origin:'Islay, Scotland',age:'',abv:'46.6',category:'Single Malt'},
+  {name:'Bowmore 12',distillery:'Bowmore',origin:'Islay, Scotland',age:'12',abv:'40',category:'Single Malt'},
+  {name:'Bowmore 15 Darkest',distillery:'Bowmore',origin:'Islay, Scotland',age:'15',abv:'43',category:'Single Malt'},
+  {name:'Bowmore 18',distillery:'Bowmore',origin:'Islay, Scotland',age:'18',abv:'43',category:'Single Malt'},
+  {name:'Bruichladdich Classic Laddie',distillery:'Bruichladdich',origin:'Islay, Scotland',age:'',abv:'50',category:'Single Malt'},
+  {name:'Bruichladdich Octomore 14.1',distillery:'Bruichladdich',origin:'Islay, Scotland',age:'',abv:'59.5',category:'Single Malt'},
+  {name:'Bunnahabhain 12',distillery:'Bunnahabhain',origin:'Islay, Scotland',age:'12',abv:'46.3',category:'Single Malt'},
+  {name:'Caol Ila 12',distillery:'Caol Ila',origin:'Islay, Scotland',age:'12',abv:'43',category:'Single Malt'},
+  {name:'Kilchoman Machir Bay',distillery:'Kilchoman',origin:'Islay, Scotland',age:'',abv:'46',category:'Single Malt'},
+  {name:'Kilchoman Sanaig',distillery:'Kilchoman',origin:'Islay, Scotland',age:'',abv:'46',category:'Single Malt'},
+
+  // ── HIGHLANDS ──
+  {name:'Glenmorangie Original 10',distillery:'Glenmorangie',origin:'Highlands, Scotland',age:'10',abv:'40',category:'Single Malt'},
+  {name:'Glenmorangie Lasanta 12',distillery:'Glenmorangie',origin:'Highlands, Scotland',age:'12',abv:'43',category:'Single Malt'},
+  {name:'Glenmorangie Quinta Ruban 14',distillery:'Glenmorangie',origin:'Highlands, Scotland',age:'14',abv:'46',category:'Single Malt'},
+  {name:'Glenmorangie Nectar D\'Or 12',distillery:'Glenmorangie',origin:'Highlands, Scotland',age:'12',abv:'46',category:'Single Malt'},
+  {name:'Dalmore 12',distillery:'The Dalmore',origin:'Highlands, Scotland',age:'12',abv:'40',category:'Single Malt'},
+  {name:'Dalmore 15',distillery:'The Dalmore',origin:'Highlands, Scotland',age:'15',abv:'40',category:'Single Malt'},
+  {name:'Dalmore 18',distillery:'The Dalmore',origin:'Highlands, Scotland',age:'18',abv:'43',category:'Single Malt'},
+  {name:'Oban 14',distillery:'Oban',origin:'West Highlands, Scotland',age:'14',abv:'43',category:'Single Malt'},
+  {name:'Talisker 10',distillery:'Talisker',origin:'Isle of Skye, Scotland',age:'10',abv:'45.8',category:'Single Malt'},
+  {name:'Talisker 18',distillery:'Talisker',origin:'Isle of Skye, Scotland',age:'18',abv:'45.8',category:'Single Malt'},
+  {name:'Talisker Storm',distillery:'Talisker',origin:'Isle of Skye, Scotland',age:'',abv:'45.8',category:'Single Malt'},
+  {name:'Highland Park 12',distillery:'Highland Park',origin:'Orkney, Scotland',age:'12',abv:'40',category:'Single Malt'},
+  {name:'Highland Park 18',distillery:'Highland Park',origin:'Orkney, Scotland',age:'18',abv:'43',category:'Single Malt'},
+  {name:'Edradour 10',distillery:'Edradour',origin:'Highlands, Scotland',age:'10',abv:'40',category:'Single Malt'},
+  {name:'Clynelish 14',distillery:'Clynelish',origin:'Highlands, Scotland',age:'14',abv:'46',category:'Single Malt'},
+
+  // ── LOWLANDS ──
+  {name:'Auchentoshan Three Wood',distillery:'Auchentoshan',origin:'Lowlands, Scotland',age:'',abv:'43',category:'Single Malt'},
+  {name:'Auchentoshan American Oak',distillery:'Auchentoshan',origin:'Lowlands, Scotland',age:'',abv:'40',category:'Single Malt'},
+
+  // ── BLENDED SCOTCH ──
+  {name:'Johnnie Walker Black Label 12',distillery:'Diageo',origin:'Scotland',age:'12',abv:'40',category:'Blended'},
+  {name:'Johnnie Walker Blue Label',distillery:'Diageo',origin:'Scotland',age:'',abv:'40',category:'Blended'},
+  {name:'Johnnie Walker Gold Label Reserve',distillery:'Diageo',origin:'Scotland',age:'',abv:'40',category:'Blended'},
+  {name:'Chivas Regal 12',distillery:'Chivas Brothers',origin:'Scotland',age:'12',abv:'40',category:'Blended'},
+  {name:'Chivas Regal 18',distillery:'Chivas Brothers',origin:'Scotland',age:'18',abv:'40',category:'Blended'},
+  {name:'Chivas Regal 25',distillery:'Chivas Brothers',origin:'Scotland',age:'25',abv:'40',category:'Blended'},
+  {name:'Ballantine\'s 17',distillery:'Ballantine\'s',origin:'Scotland',age:'17',abv:'40',category:'Blended'},
+  {name:'Dewar\'s 15 The Monarch',distillery:'Dewar\'s',origin:'Scotland',age:'15',abv:'40',category:'Blended'},
+  {name:'Grant\'s Triple Wood',distillery:'William Grant & Sons',origin:'Scotland',age:'',abv:'40',category:'Blended'},
+
+  // ── BOURBON ──
+  {name:'Buffalo Trace',distillery:'Buffalo Trace',origin:'Kentucky, USA',age:'',abv:'45',category:'Bourbon'},
+  {name:'Eagle Rare 10',distillery:'Buffalo Trace',origin:'Kentucky, USA',age:'10',abv:'45',category:'Bourbon'},
+  {name:'Blanton\'s Original',distillery:'Buffalo Trace',origin:'Kentucky, USA',age:'',abv:'46.5',category:'Bourbon'},
+  {name:'Maker\'s Mark',distillery:'Maker\'s Mark',origin:'Kentucky, USA',age:'',abv:'45',category:'Bourbon'},
+  {name:'Maker\'s Mark 46',distillery:'Maker\'s Mark',origin:'Kentucky, USA',age:'',abv:'47',category:'Bourbon'},
+  {name:'Bulleit Bourbon',distillery:'Bulleit',origin:'Kentucky, USA',age:'',abv:'45',category:'Bourbon'},
+  {name:'Bulleit Rye',distillery:'Bulleit',origin:'Kentucky, USA',age:'',abv:'45',category:'Rye'},
+  {name:'Woodford Reserve',distillery:'Woodford Reserve',origin:'Kentucky, USA',age:'',abv:'43.2',category:'Bourbon'},
+  {name:'Four Roses Small Batch',distillery:'Four Roses',origin:'Kentucky, USA',age:'',abv:'45',category:'Bourbon'},
+  {name:'Wild Turkey 101',distillery:'Wild Turkey',origin:'Kentucky, USA',age:'',abv:'50.5',category:'Bourbon'},
+  {name:'Knob Creek 9',distillery:'Jim Beam',origin:'Kentucky, USA',age:'9',abv:'50',category:'Bourbon'},
+  {name:'Jim Beam Double Oak',distillery:'Jim Beam',origin:'Kentucky, USA',age:'',abv:'43',category:'Bourbon'},
+
+  // ── JAPANESE ──
+  {name:'Yamazaki 12',distillery:'Suntory',origin:'Japan',age:'12',abv:'43',category:'Single Malt'},
+  {name:'Yamazaki 18',distillery:'Suntory',origin:'Japan',age:'18',abv:'43',category:'Single Malt'},
+  {name:'Hakushu 12',distillery:'Suntory',origin:'Japan',age:'12',abv:'43',category:'Single Malt'},
+  {name:'Hakushu 18',distillery:'Suntory',origin:'Japan',age:'18',abv:'43',category:'Single Malt'},
+  {name:'Hibiki Japanese Harmony',distillery:'Suntory',origin:'Japan',age:'',abv:'43',category:'Blended'},
+  {name:'Hibiki 17',distillery:'Suntory',origin:'Japan',age:'17',abv:'43',category:'Blended'},
+  {name:'Nikka From The Barrel',distillery:'Nikka',origin:'Japan',age:'',abv:'51.4',category:'Blended'},
+  {name:'Nikka Coffey Grain',distillery:'Nikka',origin:'Japan',age:'',abv:'45',category:'Grain'},
+  {name:'Nikka Coffey Malt',distillery:'Nikka',origin:'Japan',age:'',abv:'45',category:'Single Malt'},
+  {name:'Yoichi Single Malt',distillery:'Nikka',origin:'Hokkaido, Japan',age:'',abv:'45',category:'Single Malt'},
+  {name:'Miyagikyo Single Malt',distillery:'Nikka',origin:'Miyagi, Japan',age:'',abv:'45',category:'Single Malt'},
+  {name:'Togouchi 9',distillery:'Chugoku Jozo',origin:'Japan',age:'9',abv:'40',category:'Blended'},
+
+  // ── IRISH ──
+  {name:'Jameson',distillery:'Midleton',origin:'Ireland',age:'',abv:'40',category:'Blended Irish'},
+  {name:'Jameson Black Barrel',distillery:'Midleton',origin:'Ireland',age:'',abv:'40',category:'Blended Irish'},
+  {name:'Redbreast 12',distillery:'Midleton',origin:'Ireland',age:'12',abv:'40',category:'Single Pot Still'},
+  {name:'Redbreast 15',distillery:'Midleton',origin:'Ireland',age:'15',abv:'46',category:'Single Pot Still'},
+  {name:'Green Spot',distillery:'Midleton',origin:'Ireland',age:'',abv:'40',category:'Single Pot Still'},
+  {name:'Teeling Small Batch',distillery:'Teeling',origin:'Dublin, Ireland',age:'',abv:'46',category:'Blended Irish'},
+  {name:'Connemara Peated',distillery:'Cooley',origin:'Ireland',age:'',abv:'40',category:'Single Malt'},
+];
+
+/* ══════════════════════════════════════
+   UTIL & STATE
+══════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm = s => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
+const pad = n => String(n).padStart(2, '0');
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
+const fmtDate = d => d ? String(d).replace(/[-.]/g, '. ').replace(/\s+/g, ' ') + '.' : '';
+const starStr = n => n ? '★'.repeat(n) + '☆'.repeat(5 - n) : '';
+const visText = v => { if (v == null || v === '') return ''; if (typeof v === 'number' || /^\d+$/.test(v)) return `${VIS[v] || ''} (${v})`; return String(v); };
+const ageText = a => a ? (/^\d+$/.test(String(a)) ? a + '년' : a) : '';
+const abvText = a => a ? (/^[\d.]+$/.test(String(a)) ? a + '%' : a) : '';
+
+function loadNotes(){ try { return JSON.parse(localStorage.getItem('wk_notes') || '[]'); } catch(e){ return []; } }
+function persist(){ try { localStorage.setItem('wk_notes', JSON.stringify(notes)); } catch(e){ showToast('이 브라우저에선 저장 공간을 쓸 수 없어요'); } }
+
+let notes = loadNotes();
+let currentView = 'landing', viewingId = null, editingId = null, editingDate = '', navStack = [];
+let score = 0, color = null, colorBg = null, detailOpen = false, lookupTimer = null, lastMatches = [];
+let feedFilter = 'all', searchFilter = 'all';
+
+/* ══════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════ */
+const TAB_VIEWS = ['archive','feed','search','guide'];
+function showView(name){
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  $('view-' + name).classList.add('active');
+  currentView = name;
+  const tb = $('tabbar');
+  tb.classList.toggle('show', TAB_VIEWS.includes(name));
+  tb.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.v === name));
+}
+function go(name){
+  navStack = []; viewingId = null;
+  if (name === 'archive') renderArchive();
+  if (name === 'feed') renderFeed();
+  if (name === 'search') renderSearch();
+  showView(name);
+}
+function login(p){
+  showToast(p === 'kakao' ? '카카오 로그인은 서버 연동 후 열려요' : 'Google 로그인은 서버 연동 후 열려요');
+  setTimeout(() => go('archive'), 650);
+}
+
+/* ══════════════════════════════════════
+   BOTTLE
+══════════════════════════════════════ */
+function shade(hex, amt){
+  const h = String(hex || '#9C7A33').replace('#','');
+  if (h.length !== 6) return hex;
+  return '#' + [0,2,4].map(i => Math.max(0, Math.min(255, parseInt(h.slice(i,i+2),16) + amt)).toString(16).padStart(2,'0')).join('');
+}
+let gid = 0;
+function bottleSVG(c, w, h){
+  const base = c || '#9C7A33', lt = shade(base, 50), dk = shade(base, -40), id = 'bg' + (gid++);
+  return `<svg width="${w}" height="${h}" viewBox="0 0 38 62" aria-hidden="true">
+    <defs><linearGradient id="${id}" x1="0" x2="1"><stop offset="0" stop-color="${dk}"/><stop offset=".3" stop-color="${base}"/><stop offset=".55" stop-color="${lt}"/><stop offset="1" stop-color="${dk}"/></linearGradient></defs>
+    <rect x="14.5" y="6" width="9" height="6" fill="${dk}"/>
+    <path d="M12.5 1.5h13a1 1 0 0 1 1 1V7q-.9 1.4-1.8 0q-1.1 2.4-2.2 0q-1 1.3-2 0q-1.3 2.8-2.6 0q-1 1.2-2 0q-1.2 2.2-2.4 0q-1 1.4-2 0V2.5a1 1 0 0 1 1-1z" fill="#6E2416"/>
+    <path d="M13.5 2.3h3v3.6h-3z" fill="rgba(255,190,160,.2)"/>
+    <path d="M14.5 11.5Q8.5 14.5 7.5 20.5L7.5 53Q7.5 58 12.5 58L25.5 58Q30.5 58 30.5 53L30.5 20.5Q29.5 14.5 23.5 11.5Z" fill="url(#${id})" stroke="rgba(30,15,5,.4)" stroke-width=".6"/>
+    <path d="M11 21Q10 26 10 34L10 51" stroke="rgba(255,255,255,.3)" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    <rect x="10" y="27" width="18" height="17" fill="#EADBB5" stroke="rgba(60,40,15,.55)" stroke-width=".5"/>
+    <rect x="11.2" y="28.2" width="15.6" height="14.6" fill="none" stroke="rgba(60,40,15,.35)" stroke-width=".35"/>
+    <path d="M13.5 32h11M14.5 35.5h9M15.5 39h7" stroke="rgba(60,40,15,.45)" stroke-width=".55"/>
+  </svg>`;
+}
+
+/* ══════════════════════════════════════
+   CELLAR
+══════════════════════════════════════ */
+function monthLabel(k){
+  if (k === 'undated') return 'Undated';
+  const [y, m] = k.split(/[-.]/);
+  return `${y} · ${m}`;
+}
+function shelfHTML(k, list){
+  return `<div class="shelf">
+    <div class="shelf-items">
+      ${list.map(n => `<div class="btl" onclick="openNote('${n.id}')">${bottleSVG(n.colorBg,40,64)}<div class="btl-name">${esc(n.name)}</div>${n.score ? `<div class="btl-stars">${'★'.repeat(n.score)}</div>` : ''}</div>`).join('')}
+      <div class="btl empty" onclick="newNote()"><div class="ghost">+</div></div>
+    </div>
+    <div class="plank">${k ? `<span class="plank-tag">${esc(monthLabel(k))}</span>` : ''}</div>
+  </div>`;
+}
+function renderArchive(){
+  $('cellarSub').textContent = notes.length ? `${notes.length} drams in the cellar` : 'An empty cellar, for now';
+  if (!notes.length){
+    $('shelves').innerHTML = `<div class="cellar-empty"><div class="big">Your cellar awaits its first dram.</div><p>아직 기록된 위스키가 없어요.<br>첫 잔을 기록하면 이 선반에 병이 놓입니다.</p></div>` + shelfHTML('', []);
+    return;
+  }
+  const groups = {};
+  notes.forEach(n => { const k = String(n.date || '').slice(0,7) || 'undated'; (groups[k] = groups[k] || []).push(n); });
+  $('shelves').innerHTML = Object.keys(groups).sort().reverse().map(k => shelfHTML(k, groups[k])).join('');
+}
+
+/* ══════════════════════════════════════
+   FORM
+══════════════════════════════════════ */
+function renderTags(type){
+  const list = type === 'aroma' ? AROMAS : FLAVOURS;
+  $(type + 'Tags').innerHTML = list.map(([t, h]) => `<span class="tag" data-t="${esc(t)}" data-hint="${esc(h)}" onclick="toggleTag(this,'${type}')">${esc(t)}</span>`).join('')
+    + `<span class="tag add" onclick="toggleEtc('${type}')">+ 기타</span>`;
+}
+function renderSwatches(){
+  $('swatches').innerHTML = COLORS.map(([name, hex, short]) => `<div class="sw" data-c="${name}" data-hex="${hex}" onclick="pickColor(this)"><i style="background:${hex}"></i><span>${short}</span></div>`).join('');
+}
+function newNote(){
+  resetForm();
+  showView('form');
+}
+function resetForm(){
+  ['f_name','f_distillery','f_origin','f_age','f_abv','f_category','f_nose1','f_nose2','f_palate','f_mouthfeel','f_finish','f_oneliner','f_pairing','f_notes','aromaEtcInput','flavourEtcInput']
+    .forEach(id => { $(id).value = ''; });
+  $('f_date').value = today();
+  document.querySelectorAll('#aromaTags .tag, #flavourTags .tag').forEach(t => t.classList.remove('on'));
+  $('aromaCustom').innerHTML = ''; $('flavourCustom').innerHTML = '';
+  $('aromaHint').textContent = ''; $('flavourHint').textContent = '';
+  $('aromaEtc').classList.remove('show'); $('flavourEtc').classList.remove('show');
+  document.querySelectorAll('.sw').forEach(s => s.classList.remove('on'));
+  $('picked').textContent = '';
+  $('vis').value = 5; updateVis(5);
+  setScore(0);
+  document.querySelectorAll('#rebuyOpts .opt').forEach(o => o.classList.remove('on'));
+  document.querySelectorAll('#privacyOpts .opt').forEach(o => o.classList.toggle('on', o.dataset.v === 'public'));
+  $('autoInfo').style.display = 'none'; $('autofill').style.display = 'none'; $('suggest').style.display = 'none';
+  color = null; colorBg = null; editingId = null; editingDate = '';
+  $('formTitle').textContent = 'New Entry';
+  setMode('basic');
+  $('formScroll').scrollTop = 0;
+}
+function setMode(mode){
+  detailOpen = mode === 'detail';
+  $('formScroll').classList.toggle('detailed', detailOpen);
+  $('mBasic').classList.toggle('on', !detailOpen);
+  $('mDetail').classList.toggle('on', detailOpen);
+  $('expandBtn').querySelector('span').textContent = detailOpen ? '상세 기록 접기' : '상세 기록 펼치기';
+}
+
+/* 도감 검색 */
+function onLookup(v){
+  clearTimeout(lookupTimer);
+  $('autofill').style.display = 'none';
+  if (!v.trim()){ $('suggest').style.display = 'none'; $('spin').style.display = 'none'; return; }
+  $('spin').style.display = 'block';
+  lookupTimer = setTimeout(() => {
+    $('spin').style.display = 'none';
+    const q = norm(v);
+    lastMatches = WHISKY_DB.filter(w => norm(w.name).includes(q) || norm(w.distillery).includes(q)).slice(0, 6);
+    $('suggest').innerHTML = lastMatches.map((w, i) => `<div class="sg" onclick="pickWhisky(${i})"><b>${esc(w.name)}</b><span>${esc([w.distillery, w.origin, abvText(w.abv)].filter(Boolean).join(' · '))}</span></div>`).join('')
+      + `<div class="sg manual" onclick="manualEntry()">“${esc(v)}” 직접 적기</div>`;
+    $('suggest').style.display = 'block';
+  }, 220);
+}
+function applyWhisky(w){
+  $('f_name').value = w.name;
+  $('f_distillery').value = w.distillery || '';
+  $('f_origin').value = w.origin || '';
+  $('f_age').value = w.age || '';
+  $('f_abv').value = w.abv || '';
+  $('f_category').value = w.category || '';
+  $('suggest').style.display = 'none';
+  $('autoInfo').style.display = 'block';
+  $('autofill').style.display = 'block';
+}
+function pickWhisky(i){ if (lastMatches[i]) applyWhisky(lastMatches[i]); }
+function manualEntry(){ $('suggest').style.display = 'none'; $('autoInfo').style.display = 'block'; }
+
+/* 색·점도·태그·별점·선택지 */
+function pickColor(el){
+  document.querySelectorAll('.sw').forEach(s => s.classList.remove('on'));
+  el.classList.add('on');
+  color = el.dataset.c; colorBg = el.dataset.hex;
+  $('picked').textContent = color;
+}
+function updateVis(v){ $('visVal').textContent = visText(Number(v)); }
+function toggleTag(el, type){
+  el.classList.toggle('on');
+  const hintEl = $(type + 'Hint');
+  if (el.classList.contains('on')) { hintEl.textContent = `${el.dataset.t} — ${el.dataset.hint}`; return; }
+  const on = [...$(type + 'Tags').querySelectorAll('.tag.on:not(.add)')];
+  const last = on[on.length - 1];
+  hintEl.textContent = last ? `${last.dataset.t} — ${last.dataset.hint}` : '';
+}
+function toggleEtc(type){
+  const box = $(type + 'Etc');
+  box.classList.toggle('show');
+  if (box.classList.contains('show')) $(type + 'EtcInput').focus();
+}
+function etcKey(e, type){ if (e.key === 'Enter' && !e.isComposing){ e.preventDefault(); addEtc(type); } }
+function addCustomTag(type, val){
+  const span = document.createElement('span');
+  span.className = 'tag on'; span.dataset.t = val;
+  span.innerHTML = `${esc(val)}<b onclick="this.parentElement.remove()">×</b>`;
+  $(type + 'Custom').appendChild(span);
+}
+function addEtc(type){
+  const input = $(type + 'EtcInput');
+  const val = input.value.trim();
+  if (!val) return;
+  addCustomTag(type, val);
+  input.value = '';
+}
+function setScore(v){
+  score = v;
+  document.querySelectorAll('#stars .star').forEach((s, i) => s.classList.toggle('on', i < v));
+  $('starLbl').textContent = SCORE_LBL[v] || '';
+}
+function setOpt(el){
+  el.parentElement.querySelectorAll('.opt').forEach(o => o.classList.remove('on'));
+  el.classList.add('on');
+}
+const optVal = id => { const o = document.querySelector(`#${id} .opt.on`); return o ? o.dataset.v : ''; };
+const tagsOf = type => [...document.querySelectorAll(`#${type}Tags .tag.on:not(.add)`), ...document.querySelectorAll(`#${type}Custom .tag`)].map(t => t.dataset.t);
+
+function saveNote(){
+  const name = $('f_name').value.trim();
+  if (!name){ showToast('위스키 이름을 적어주세요'); $('f_name').focus(); return; }
+  const note = {
+    id: editingId || Date.now().toString(),
+    name,
+    distillery: $('f_distillery').value.trim(),
+    origin: $('f_origin').value.trim(),
+    age: $('f_age').value,
+    abv: $('f_abv').value,
+    category: $('f_category').value.trim(),
+    date: $('f_date').value || editingDate || today(),
+    color, colorBg: colorBg || '#9C7A33',
+    viscosity: Number($('vis').value),
+    aromaTags: tagsOf('aroma'),
+    flavourTags: tagsOf('flavour'),
+    nose1: $('f_nose1').value.trim(), nose2: $('f_nose2').value.trim(),
+    palate: $('f_palate').value.trim(), mouthfeel: $('f_mouthfeel').value.trim(), finish: $('f_finish').value.trim(),
+    score, rebuy: optVal('rebuyOpts'),
+    oneliner: $('f_oneliner').value.trim(), pairing: $('f_pairing').value.trim(), notes: $('f_notes').value.trim(),
+    isPublic: optVal('privacyOpts') !== 'private'
+  };
+  if (editingId){
+    const i = notes.findIndex(n => n.id === editingId);
+    if (i !== -1) notes[i] = note; else notes.unshift(note);
+  } else notes.unshift(note);
+  persist();
+  showToast('기록장에 적어두었어요');
+  setTimeout(() => go('archive'), 450);
+}
+function editNote(){
+  const n = notes.find(x => x.id === viewingId);
+  if (!n) return;
+  resetForm();
+  editingId = n.id; editingDate = n.date || '';
+  $('formTitle').textContent = 'Revision';
+  $('f_name').value = n.name || '';
+  $('f_distillery').value = n.distillery || ''; $('f_origin').value = n.origin || '';
+  $('f_age').value = /^\d+$/.test(String(n.age || '')) ? n.age : '';
+  $('f_abv').value = /^[\d.]+$/.test(String(n.abv || '').replace('%','')) ? String(n.abv).replace('%','') : '';
+  $('f_category').value = n.category || '';
+  if (n.distillery || n.origin || n.category) $('autoInfo').style.display = 'block';
+  $('f_date').value = /^\d{4}-\d{2}-\d{2}$/.test(n.date || '') ? n.date : '';
+  const sw = document.querySelector(`.sw[data-c="${n.color}"]`);
+  if (sw) pickColor(sw); else if (n.colorBg) colorBg = n.colorBg;
+  const v = typeof n.viscosity === 'number' ? n.viscosity : parseInt((String(n.viscosity || '').match(/\d+/) || [5])[0], 10);
+  $('vis').value = v; updateVis(v);
+  [['aroma', n.aromaTags], ['flavour', n.flavourTags]].forEach(([type, list]) => (list || []).forEach(t => {
+    const preset = $(type + 'Tags').querySelector(`.tag[data-t="${CSS.escape(t)}"]`);
+    if (preset) preset.classList.add('on'); else addCustomTag(type, t);
+  }));
+  ['f_nose1','f_nose2','f_palate','f_mouthfeel','f_finish','f_oneliner','f_pairing','f_notes'].forEach(id => { $(id).value = n[id.slice(2)] || ''; });
+  setScore(n.score || 0);
+  document.querySelectorAll('#rebuyOpts .opt').forEach(o => o.classList.toggle('on', o.dataset.v === n.rebuy));
+  document.querySelectorAll('#privacyOpts .opt').forEach(o => o.classList.toggle('on', o.dataset.v === (n.isPublic === false ? 'private' : 'public')));
+  if (n.nose2 || n.mouthfeel || n.pairing || n.notes) setMode('detail');
+  showView('form');
+}
+function deleteNote(){
+  if (!confirm('이 노트를 지울까요? 되돌릴 수 없어요.')) return;
+  notes = notes.filter(n => n.id !== viewingId);
+  persist();
+  showToast('노트를 지웠어요');
+  go('archive');
+}
+function recordThis(id){
+  const src = SAMPLE_NOTES.find(n => n.id === id);
+  newNote();
+  if (!src) return;
+  const w = WHISKY_DB.find(x => norm(x.name) === norm(src.name));
+  if (w) applyWhisky(w); else $('f_name').value = src.name;
+}
+
+/* ══════════════════════════════════════
+   DETAIL
+══════════════════════════════════════ */
+function findNote(id){
+  const mine = notes.find(n => n.id === id);
+  return { n: mine || SAMPLE_NOTES.find(n => n.id === id), mine: !!mine };
+}
+function openNote(id){
+  const { n, mine } = findNote(id);
+  if (!n) return;
+  navStack.push(currentView === 'detail' ? { v: 'detail', id: viewingId } : { v: currentView });
+  viewingId = id;
+  renderDetail(n, mine);
+  showView('detail');
+  $('detailScroll').scrollTop = 0;
+}
+function goBack(){
+  const prev = navStack.pop();
+  if (!prev){ go('archive'); return; }
+  if (prev.v === 'detail'){
+    const { n, mine } = findNote(prev.id);
+    if (n){ viewingId = prev.id; renderDetail(n, mine); showView('detail'); $('detailScroll').scrollTop = 0; return; }
+  }
+  viewingId = null;
+  if (prev.v === 'archive') renderArchive();
+  if (prev.v === 'feed') renderFeed();
+  if (prev.v === 'search') renderSearch();
+  showView(prev.v === 'detail' ? 'archive' : prev.v);
+}
+const kv = (k, v) => v ? `<dl class="kv"><dt>${k}</dt><dd>${v}</dd></dl>` : '';
+const stampList = list => list && list.length ? `<div class="stamps">${list.map(t => `<span>${esc(t)}</span>`).join('')}</div>` : '';
+const dsec = (ko, en, inner) => inner.trim() ? `<div class="dsec"><h3><b>${ko}</b><i>${en}</i></h3>${inner}</div>` : '';
+
+function renderDetail(n, mine){
+  $('detailRight').innerHTML = mine ? `<button class="stamp-btn" onclick="editNote()">수정</button>` : '';
+  const meta = [n.distillery, n.origin, ageText(n.age), abvText(n.abv)].filter(Boolean).join(' · ');
+  let html = `
+    <div class="specimen"><div class="specimen-in">
+      <div>${bottleSVG(n.colorBg, 52, 84)}</div>
+      <div style="min-width:0">
+        <div class="sp-kicker">${mine ? 'My Tasting Note' : 'Tasting Note'}${n.category ? ' · ' + esc(n.category) : ''}</div>
+        <div class="sp-name">${esc(n.name)}</div>
+        ${meta ? `<div class="sp-meta">${esc(meta)}</div>` : ''}
+        ${n.score ? `<div class="sp-stars">${starStr(n.score)}</div>` : ''}
+        ${mine && n.isPublic === false ? '<span class="priv">Private · 나만 보기</span>' : ''}
+      </div>
+    </div></div>
+    <div class="byline">${mine ? '나의 기록' : esc(n.author) + ' 님의 기록'}<small>${n.date ? '· ' + esc(fmtDate(n.date)) : ''}</small></div>
+    ${n.oneliner ? `<div class="dsec"><div class="quote">${esc(n.oneliner)}</div></div>` : ''}
+    ${dsec('보기', 'Appearance',
+        kv('Colour', n.color ? `<span class="dot" style="background:${esc(n.colorBg)}"></span>${esc(n.color)}` : '') +
+        kv('Viscosity', esc(visText(n.viscosity))))}
+    ${dsec('맡기', 'Nose', stampList(n.aromaTags) + kv('First Impression', esc(n.nose1)) + kv('After Water', esc(n.nose2)))}
+    ${dsec('맛보기', 'Taste', stampList(n.flavourTags) + kv('Palate', esc(n.palate)) + kv('Mouthfeel', esc(n.mouthfeel)) + kv('Finish', esc(n.finish)))}
+    ${dsec('종합 평가', 'Assessment', kv('Would buy again', esc(n.rebuy)) + kv('Pairing', esc(n.pairing)) + kv('Notes', esc(n.notes)))}
+  `;
+  html += mine ? peersHTML(n) : compareHTML(n);
+  if (mine) html += `<button class="danger" onclick="deleteNote()">이 노트 지우기</button>`;
+  else html += '<div style="height:36px"></div>';
+  $('detailScroll').innerHTML = html;
+}
+
+/* 내 노트 → 같은 위스키를 마신 사람들 */
+function peersHTML(n){
+  const peers = SAMPLE_NOTES.filter(x => norm(x.name) === norm(n.name));
+  const inner = peers.length
+    ? peers.map(p => `<div class="peer" onclick="openNote('${p.id}')"><div style="min-width:0"><div class="peer-who">${esc(p.author)}</div><div class="peer-txt">${esc(p.oneliner || '')}</div></div><div class="peer-stars">${'★'.repeat(p.score || 0)}</div></div>`).join('')
+    : `<p class="nudge">아직 이 위스키를 기록한 다른 사람이 없어요.<br>전체 공개로 두면 첫 번째 노트가 됩니다.</p>`;
+  return `<div class="dsec"><h3><b>같은 잔을 기울인 사람들</b><i>${peers.length ? peers.length + ' notes' : ''}</i></h3>${inner}</div>`;
+}
+
+/* 다른 사람 노트 → 나의 노트와 비교 */
+function compareHTML(n){
+  const my = notes.find(x => norm(x.name) === norm(n.name));
+  if (!my){
+    return `<div class="dsec"><h3><b>나의 노트와 비교</b><i>Compare</i></h3>
+      <p class="nudge">아직 이 위스키를 기록하지 않았어요. 마셔봤다면 기록하고, 내가 느낀 것과 나란히 놓아보세요.</p>
+      <button class="ghost-btn" onclick="recordThis('${n.id}')">이 위스키 기록하기</button></div>`;
+  }
+  const mineTags = [...(my.aromaTags || []), ...(my.flavourTags || [])];
+  const theirs = [...(n.aromaTags || []), ...(n.flavourTags || [])];
+  const shared = theirs.filter(t => mineTags.includes(t));
+  const onlyMe = mineTags.filter(t => !theirs.includes(t));
+  const onlyThem = theirs.filter(t => !mineTags.includes(t));
+  const union = new Set([...mineTags, ...theirs]).size;
+  const pct = union ? Math.round(shared.length / union * 100) : 0;
+  const line = list => list.length ? esc(list.join(', ')) : '—';
+  return `<div class="dsec"><h3><b>나의 노트와 비교</b><i>Compare</i></h3>
+    <div class="compare">
+      <div class="meter"><span>향·맛 태그 일치도</span><b>${pct}%</b></div>
+      <div class="track"><i style="width:${pct}%"></i></div>
+      <dl class="cmp"><dt>함께 느낀</dt><dd>${line(shared)}</dd></dl>
+      <dl class="cmp"><dt>나만 느낀</dt><dd>${line(onlyMe)}</dd></dl>
+      <dl class="cmp"><dt>이 분만 느낀</dt><dd>${line(onlyThem)}</dd></dl>
+      <dl class="cmp"><dt>별점</dt><dd>나 ${starStr(my.score) || '—'}<br>${esc(n.author)} ${starStr(n.score) || '—'}</dd></dl>
+    </div>
+    <button class="ghost-btn" onclick="openNote('${my.id}')">내 노트 펼쳐보기</button></div>`;
+}
+
+/* ══════════════════════════════════════
+   EXCHANGE
+══════════════════════════════════════ */
+function communityNotes(){
+  const mine = notes.filter(n => n.isPublic !== false).map(n => ({ ...n, author: '나', mine: true }));
+  return [...mine, ...SAMPLE_NOTES].sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+}
+function setFeedFilter(el){
+  document.querySelectorAll('#feedChips .chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  feedFilter = el.dataset.f;
+  renderFeed();
+}
+function renderFeed(){
+  const myNames = new Set(notes.map(n => norm(n.name)));
+  const all = communityNotes();
+  const count = {};
+  all.forEach(n => { const k = norm(n.name); count[k] = (count[k] || 0) + 1; });
+  let list = all;
+  if (feedFilter === 'same') list = list.filter(n => !n.mine && myNames.has(norm(n.name)));
+  if (feedFilter === 'top') list = list.filter(n => n.score === 5);
+  if (feedFilter === 'mine') list = list.filter(n => n.mine);
+  if (!list.length){
+    const msg = {
+      same: ['아직 겹치는 위스키가 없어요.', '노트를 하나 기록하면 같은 위스키를 마신 사람들이 여기에 모여요.'],
+      mine: ['공개한 노트가 아직 없어요.', '기록할 때 ‘전체 공개’를 고르면 여기에 실려요.'],
+    }[feedFilter] || ['보여드릴 노트가 없어요.', ''];
+    $('feedList').innerHTML = `<div class="empty-note">${msg[0]}<small>${msg[1]}</small></div>`;
+    return;
+  }
+  const rots = [-0.8, 0.6, -0.4, 0.9, -0.6, 0.4];
+  $('feedList').innerHTML = list.map((n, i) => {
+    const same = !n.mine && myNames.has(norm(n.name));
+    const c = count[norm(n.name)];
+    const tags = [...(n.aromaTags || []).slice(0, 3), ...(n.flavourTags || []).slice(0, 2)];
+    return `<article class="card${same ? ' stamped' : ''}" style="--rot:${rots[i % rots.length]}deg" onclick="openNote('${n.id}')">
+      ${same ? '<div class="seal-stamp"><b>SAME DRAM</b><span>나도 마심</span></div>' : ''}
+      <div class="card-top"><span class="card-who${n.mine ? ' me' : ''}">${n.mine ? '나의 노트' : esc(n.author)}</span><span class="card-date">${esc(fmtDate(n.date))}</span></div>
+      <div class="card-main">
+        ${bottleSVG(n.colorBg, 30, 49)}
+        <div style="min-width:0">
+          <div class="card-name">${esc(n.name)}</div>
+          <div class="card-meta">${esc([n.category, n.origin].filter(Boolean).join(' · '))}</div>
+          ${n.score ? `<div class="card-stars">${starStr(n.score)}</div>` : ''}
+        </div>
+      </div>
+      ${stampList(tags)}
+      ${n.oneliner ? `<div class="card-quote">“${esc(n.oneliner)}”</div>` : ''}
+      <div class="card-foot"><span>${c > 1 ? `이 위스키의 노트 ${c}장` : '첫 번째 노트'}</span><span>펼쳐보기 →</span></div>
+    </article>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════
+   SEARCH
+══════════════════════════════════════ */
+function setSearchFilter(el){
+  document.querySelectorAll('#searchChips .chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  searchFilter = el.dataset.f;
+  renderSearch();
+}
+function renderSearch(){
+  const q = norm($('q').value);
+  let list = notes.filter(n => !q || norm(n.name).includes(q) || norm(n.distillery).includes(q));
+  const cat = n => String(n.category || '');
+  if (searchFilter === 'malt') list = list.filter(n => cat(n).includes('Single Malt'));
+  if (searchFilter === 'blend') list = list.filter(n => cat(n).includes('Blended'));
+  if (searchFilter === 'bourbon') list = list.filter(n => cat(n).includes('Bourbon'));
+  if (searchFilter === 'five') list = list.filter(n => n.score === 5);
+  if (searchFilter === 'four') list = list.filter(n => (n.score || 0) >= 4);
+  if (!notes.length){
+    $('searchCount').textContent = '';
+    $('searchList').innerHTML = `<div class="empty-note">장부가 아직 비어 있어요.<small>노트를 기록하면 여기서 찾아볼 수 있어요.</small></div>`;
+    return;
+  }
+  $('searchCount').textContent = `${list.length} of ${notes.length} entries`;
+  $('searchList').innerHTML = list.length
+    ? list.map(n => `<div class="lrow" onclick="openNote('${n.id}')">${bottleSVG(n.colorBg, 24, 39)}<div style="min-width:0"><div class="lrow-name">${esc(n.name)}</div><div class="lrow-meta">${esc([n.category, fmtDate(n.date)].filter(Boolean).join(' · '))}</div></div>${n.score ? `<div class="lrow-stars">${'★'.repeat(n.score)}</div>` : ''}</div>`).join('')
+    : `<div class="empty-note">찾는 기록이 없어요.</div>`;
+}
+
+/* ══════════════════════════════════════
+   GUIDE
+══════════════════════════════════════ */
+function toggleCh(btn){
+  const ch = btn.parentElement;
+  const wasOpen = ch.classList.contains('open');
+  document.querySelectorAll('.ch.open').forEach(c => c.classList.remove('open'));
+  if (!wasOpen){
+    ch.classList.add('open');
+    setTimeout(() => ch.scrollIntoView({ behavior: 'smooth', block: 'start' }), 40);
+  }
+}
+function renderGuideExtras(){
+  $('guideChart').innerHTML = COLORS.map(([name, hex]) => `<div><i style="background:${hex}"></i>${name}</div>`).join('');
+  $('guideAroma').innerHTML = AROMAS.map(([t, h]) => `<div><dt>${esc(t)}</dt><dd>${esc(h)}</dd></div>`).join('');
+}
+
+/* ══════════════════════════════════════
+   TOAST & INIT
+══════════════════════════════════════ */
+let toastTimer;
+function showToast(msg){
+  const t = $('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+document.addEventListener('click', e => { if (!e.target.closest('.lookup')) $('suggest').style.display = 'none'; });
+
+renderTags('aroma'); renderTags('flavour'); renderSwatches(); renderGuideExtras(); resetForm();
+</script>
+</body>
+</html>
